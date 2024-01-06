@@ -1,0 +1,26 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "siepic"
+version = "0.6.0"
+description = "SiEPIC-Tools: for silicon photonics layout, design, verification and circuit simulation"
+authors = ["Lukas Chrostowski <lukasc@ece.ubc.ca>"]
+license = "MIT License"
+readme = "README.md"
+packages = [
+    { include = "siepic", from="klayout_dot_config/python"},
+    { include = "gsip", from="klayout_dot_config/tech"}
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.26.3"
+SciPy = "^1.11.4"
+klayout = "^0.28.14"
+tidy3d = "^2.5.0"
+
+[project.urls]
+Homepage = "https://github.com/SiEPIC/SiEPIC-Tools"
+Issues = "https://github.com/SiEPIC/SiEPIC-Tools/issues"

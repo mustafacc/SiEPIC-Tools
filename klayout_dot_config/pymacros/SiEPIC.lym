@@ -87,7 +87,6 @@ else:
     SiEPIC.extend = reload(SiEPIC.extend)
     SiEPIC._globals = reload(SiEPIC._globals)
     SiEPIC.core = reload(SiEPIC.core)
-    SiEPIC.examples = reload(SiEPIC.examples)
 #    SiEPIC.lumerical = reload(SiEPIC.lumerical)
 #    SiEPIC.lumerical.fdtd = reload(SiEPIC.lumerical.fdtd)
 #    SiEPIC.lumerical.interconnect = reload(SiEPIC.lumerical.interconnect)
