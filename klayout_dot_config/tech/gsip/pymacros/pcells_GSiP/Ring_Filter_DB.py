@@ -104,6 +104,7 @@ class Ring_Filter_DB(pya.PCellDeclarationHelper):
     # Generate the layout:
    
     # Create the ring resonator
+    ly.technology_name= 'GSiP'
     t = pya.Trans(pya.Trans.R0,(self.r+self.w/2)/dbu, (self.r+self.g+self.w)/dbu)
     pcell = ly.create_cell("Ring", "GSiP", { "layer": LayerSi, "radius": self.r, "width": self.w } )
     self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))

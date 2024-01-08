@@ -1,5 +1,6 @@
 import pya
 from pya import *
+from SiEPIC.utils import get_technology_by_name, load_Waveguides_by_Tech
 
 class Wireguide(pya.PCellDeclarationHelper):
     # RIT Integrated Photonics Group (Karl McNulty) 
@@ -42,7 +43,7 @@ class Wireguide(pya.PCellDeclarationHelper):
     
     print("GSiP.Wireguide")
     
-    TECHNOLOGY = get_technology_by_name('GSiP') if op_tag=="GUI" else Tech.load_from_xml(lyp_filepath).layers
+    TECHNOLOGY = get_technology_by_name('GSiP')
     dbu = self.layout.dbu
     wg_width = to_itype(self.width,dbu)
     path = self.path.to_itype(dbu)

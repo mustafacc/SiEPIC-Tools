@@ -1,7 +1,7 @@
-import pya
-from pya import *
+from pya import PCellDeclarationHelper, Path, Point, DPoint, Box, Text, Trans, CellInstArray, Polygon, Region
 
-class Ring_Modulator_DB(pya.PCellDeclarationHelper):
+
+class Ring_Modulator_DB(PCellDeclarationHelper):
   """
   The PCell declaration for ring modulator.
   Consists of a ring with 2 straight waveguides
@@ -15,7 +15,7 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     TECHNOLOGY = get_technology_by_name('GSiP')
 
     self.param("silayer", self.TypeLayer, "Si Layer", default = TECHNOLOGY['Si'])
-    self.param("s", self.TypeShape, "", default = pya.DPoint(0, 0))
+    self.param("s", self.TypeShape, "", default = DPoint(0, 0))
     self.param("r", self.TypeDouble, "Radius", default = 10)
     self.param("w", self.TypeDouble, "Waveguide Width", default = 0.5)
     self.param("g", self.TypeDouble, "Gap", default = 0.2)
@@ -147,42 +147,43 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     # Generate the layout:
    
     # Create the ring resonator
-    t = pya.Trans(pya.Trans.R0,x0, y0)
+    ly.technology_name= 'GSiP'
+    t = Trans(Trans.R0,x0, y0)
     pcell = ly.create_cell("Ring", "GSiP", { "layer": self.silayer, "radius": self.r, "width": self.w } )
-    self.cell.insert(pya.CellInstArray(pcell.cell_index(), t))
+    self.cell.insert(CellInstArray(pcell.cell_index(), t))
 
     
     # Create the two waveguides
-    wg1 = pya.Box(x0 - (w_Si3 / 2 + taper_length), -w/2, x0 + (w_Si3 / 2 + taper_length), w/2)
+    wg1 = Box(x0 - (w_Si3 / 2 + taper_length), -w/2, x0 + (w_Si3 / 2 + taper_length), w/2)
     shapes(LayerSiN).insert(wg1)
     y_offset = 2*r + g + gmon + 2*w
-    wg2 = pya.Box(x0 - (w_Si3 / 2 + taper_length), y_offset-w/2, x0 + (w_Si3 / 2 + taper_length), y_offset+w/2)
+    wg2 = Box(x0 - (w_Si3 / 2 + taper_length), y_offset-w/2, x0 + (w_Si3 / 2 + taper_length), y_offset+w/2)
     shapes(LayerSiN).insert(wg2)
 
     
     #Create the SiEtch2 (Slab) layer
-    boxSi3 = pya.Box(x0-w_Si3/2.0, y0 - h_Si3/2.0, x0+w_Si3/2.0, y0 + h_Si3/2.0)
+    boxSi3 = Box(x0-w_Si3/2.0, y0 - h_Si3/2.0, x0+w_Si3/2.0, y0 + h_Si3/2.0)
     shapes(LayerSi3N).insert(boxSi3)
-    pin1pts = [pya.Point(x0-w_Si3/2.0, -taper_bigend/2.0),
-               pya.Point(x0-w_Si3/2.0-taper_length,-taper_smallend/2.0),
-               pya.Point(x0-w_Si3/2.0-taper_length,taper_smallend/2.0),
-               pya.Point(x0-w_Si3/2.0, taper_bigend/2.0)]
-    pin2pts = [pya.Point(x0+w_Si3/2.0,-taper_bigend/2.0),
-               pya.Point(x0+w_Si3/2.0+taper_length,-taper_smallend/2.0),
-               pya.Point(x0+w_Si3/2.0+taper_length,taper_smallend/2.0),
-               pya.Point(x0+w_Si3/2.0,+taper_bigend/2.0)]
-    pin3pts = [pya.Point(x0-w_Si3/2.0,y_offset-taper_bigend/2.0),
-               pya.Point(x0-w_Si3/2.0-taper_length,y_offset-taper_smallend/2.0),
-               pya.Point(x0-w_Si3/2.0-taper_length,y_offset+taper_smallend/2.0),
-               pya.Point(x0-w_Si3/2.0,y_offset+ taper_bigend/2.0)]
-    pin4pts = [pya.Point(x0+w_Si3/2.0,y_offset-taper_bigend/2.0),
-               pya.Point(x0+w_Si3/2.0+taper_length,y_offset-taper_smallend/2.0),
-               pya.Point(x0+w_Si3/2.0+taper_length,y_offset+taper_smallend/2.0),
-               pya.Point(x0+w_Si3/2.0,y_offset+taper_bigend/2.0)]
-    shapes(LayerSi3N).insert(pya.Polygon(pin1pts))
-    shapes(LayerSi3N).insert(pya.Polygon(pin2pts))
-    shapes(LayerSi3N).insert(pya.Polygon(pin3pts))
-    shapes(LayerSi3N).insert(pya.Polygon(pin4pts))
+    pin1pts = [Point(x0-w_Si3/2.0, -taper_bigend/2.0),
+               Point(x0-w_Si3/2.0-taper_length,-taper_smallend/2.0),
+               Point(x0-w_Si3/2.0-taper_length,taper_smallend/2.0),
+               Point(x0-w_Si3/2.0, taper_bigend/2.0)]
+    pin2pts = [Point(x0+w_Si3/2.0,-taper_bigend/2.0),
+               Point(x0+w_Si3/2.0+taper_length,-taper_smallend/2.0),
+               Point(x0+w_Si3/2.0+taper_length,taper_smallend/2.0),
+               Point(x0+w_Si3/2.0,+taper_bigend/2.0)]
+    pin3pts = [Point(x0-w_Si3/2.0,y_offset-taper_bigend/2.0),
+               Point(x0-w_Si3/2.0-taper_length,y_offset-taper_smallend/2.0),
+               Point(x0-w_Si3/2.0-taper_length,y_offset+taper_smallend/2.0),
+               Point(x0-w_Si3/2.0,y_offset+ taper_bigend/2.0)]
+    pin4pts = [Point(x0+w_Si3/2.0,y_offset-taper_bigend/2.0),
+               Point(x0+w_Si3/2.0+taper_length,y_offset-taper_smallend/2.0),
+               Point(x0+w_Si3/2.0+taper_length,y_offset+taper_smallend/2.0),
+               Point(x0+w_Si3/2.0,y_offset+taper_bigend/2.0)]
+    shapes(LayerSi3N).insert(Polygon(pin1pts))
+    shapes(LayerSi3N).insert(Polygon(pin2pts))
+    shapes(LayerSi3N).insert(Polygon(pin3pts))
+    shapes(LayerSi3N).insert(Polygon(pin4pts))
     
     # arc angles
     # doping:
@@ -201,112 +202,112 @@ class Ring_Modulator_DB(pya.PCellDeclarationHelper):
     from SiEPIC.utils import arc
 
     #Create the N Layer
-    self.cell.shapes(LayernN).insert(pya.Path(arc(r_n, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
+    self.cell.shapes(LayernN).insert(Path(arc(r_n, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
 
     #Create the P Layer
-    self.cell.shapes(LayerpN).insert(pya.Path(arc(r_p, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
+    self.cell.shapes(LayerpN).insert(Path(arc(r_p, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
     
     #Create the N+ Layer
-    self.cell.shapes(LayernpN).insert(pya.Path(arc(r_np, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
+    self.cell.shapes(LayernpN).insert(Path(arc(r_np, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
 
     #Create the P+ Layer
-    self.cell.shapes(LayerppN).insert(pya.Path(arc(r_pp, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
+    self.cell.shapes(LayerppN).insert(Path(arc(r_pp, angle_min_doping, angle_max_doping), w_1).transformed(t).simple_polygon())
     
     #Create the N++ Layer
-    self.cell.shapes(LayernppN).insert(pya.Path(arc(r_npp, angle_min_doping, angle_max_doping), w_2).transformed(t).simple_polygon())
+    self.cell.shapes(LayernppN).insert(Path(arc(r_npp, angle_min_doping, angle_max_doping), w_2).transformed(t).simple_polygon())
 
     #Create the P+ +Layer
-    poly = pya.Path(arc(r_ppp, angle_min_doping, angle_max_doping), w_2).transformed(t).simple_polygon()
-    self.cell.shapes(LayerpppN).insert(pya.Region(poly) - pya.Region(pya.Box(x0-r_ppp-w_2/2, y_offset-w/2 - 0.75/dbu, x0+r_ppp+w/2, y_offset+w/2 + 0.75/dbu)))
+    poly = Path(arc(r_ppp, angle_min_doping, angle_max_doping), w_2).transformed(t).simple_polygon()
+    self.cell.shapes(LayerpppN).insert(Region(poly) - Region(Box(x0-r_ppp-w_2/2, y_offset-w/2 - 0.75/dbu, x0+r_ppp+w/2, y_offset+w/2 + 0.75/dbu)))
     
     #Create the VC Layer
-    self.cell.shapes(LayervcN).insert(pya.Path(arc(r_vc1, angle_min_VC, angle_max_VC), w_vc).transformed(t).simple_polygon())
+    self.cell.shapes(LayervcN).insert(Path(arc(r_vc1, angle_min_VC, angle_max_VC), w_vc).transformed(t).simple_polygon())
 
-    poly = pya.Path(arc(r_vc2, angle_min_VC, angle_max_VC), w_vc).transformed(t).simple_polygon()
-    self.cell.shapes(LayervcN).insert(pya.Region(poly) - pya.Region(pya.Box(x0-r_vc2-w_vc/2, y_offset-w/2 - 1.5/dbu, x0+r_vc2+w_vc/2, y_offset+w/2 + 1.5/dbu)))
+    poly = Path(arc(r_vc2, angle_min_VC, angle_max_VC), w_vc).transformed(t).simple_polygon()
+    self.cell.shapes(LayervcN).insert(Region(poly) - Region(Box(x0-r_vc2-w_vc/2, y_offset-w/2 - 1.5/dbu, x0+r_vc2+w_vc/2, y_offset+w/2 + 1.5/dbu)))
 
         
     #Create the M1 Layer
-    self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [pya.Point(0, 0)]).transformed(t))
-    self.cell.shapes(Layerm1N).insert(pya.Polygon(arc(w_m1_in/2.0, 0, 360)).transformed(t))
-    self.cell.shapes(Layerm1N).insert(pya.Path(arc(r_m1_out, angle_min_M1, angle_max_M1), w_m1_out).transformed(t).simple_polygon())
-    boxM11 = pya.Box(x0-w_via, y0 + r_m1_out + w_m1_out-h_via, x0+w_via, y0 + r_m1_out + w_m1_out+h_via)
+    self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in, angle_min_doping, angle_max_doping) + [Point(0, 0)]).transformed(t))
+    self.cell.shapes(Layerm1N).insert(Polygon(arc(w_m1_in/2.0, 0, 360)).transformed(t))
+    self.cell.shapes(Layerm1N).insert(Path(arc(r_m1_out, angle_min_M1, angle_max_M1), w_m1_out).transformed(t).simple_polygon())
+    boxM11 = Box(x0-w_via, y0 + r_m1_out + w_m1_out-h_via, x0+w_via, y0 + r_m1_out + w_m1_out+h_via)
     shapes(Layerm1N).insert(boxM11)
     
     #Create the ML Layer
-    self.cell.shapes(LayermlN).insert(pya.Polygon(arc(w_m1_in/2.0, 0, 360)).transformed(t))
+    self.cell.shapes(LayermlN).insert(Polygon(arc(w_m1_in/2.0, 0, 360)).transformed(t))
     
     #Create the VL Layer, as well as the electrical PinRec geometries
     # centre contact (P, anode):
-    self.cell.shapes(LayervlN).insert(pya.Polygon(arc(r_vl, 0, 360)).transformed(t))
-    self.cell.shapes(LayerPinRecN).insert(pya.Polygon(arc(r_vl, 0, 360)).transformed(t))
-    shapes(LayerPinRecN).insert(pya.Text ("elec1a", pya.Trans(pya.Trans.R0,x0,y0))).text_size = 0.5/dbu
-    shapes(LayerPinRecN).insert(pya.Box(x0-w_via/2, y0-w_via/2, x0+w_via/2, y0+w_via/2))
+    self.cell.shapes(LayervlN).insert(Polygon(arc(r_vl, 0, 360)).transformed(t))
+    self.cell.shapes(LayerPinRecN).insert(Polygon(arc(r_vl, 0, 360)).transformed(t))
+    shapes(LayerPinRecN).insert(Text ("elec1a", Trans(Trans.R0,x0,y0))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Box(x0-w_via/2, y0-w_via/2, x0+w_via/2, y0+w_via/2))
     
     # top contact (N, cathode):
-    boxVL1 = pya.Box(x0-w_via/2, y0 +  r_vc2 +  w_vc/2 + 2.0/dbu, x0+w_via/2, y0 + r_vc2 +  w_vc/2 + 2.0/dbu+ h_via)
+    boxVL1 = Box(x0-w_via/2, y0 +  r_vc2 +  w_vc/2 + 2.0/dbu, x0+w_via/2, y0 + r_vc2 +  w_vc/2 + 2.0/dbu+ h_via)
     shapes(LayervlN).insert(boxVL1)
     shapes(LayerPinRecN).insert(boxVL1)
-    shapes(LayerPinRecN).insert(pya.Text ("elec1c", pya.Trans(pya.Trans.R0,x0,y0 + r_vc2 +  w_vc/2 + 2.0/dbu+ h_via/2))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Text ("elec1c", Trans(Trans.R0,x0,y0 + r_vc2 +  w_vc/2 + 2.0/dbu+ h_via/2))).text_size = 0.5/dbu
     # heater contacts
-    boxVL3 = pya.Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 2.5/dbu, -w/2.0 -  10/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 7.5/dbu, -w/2.0 -  5/dbu)
+    boxVL3 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 2.5/dbu, -w/2.0 -  10/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 7.5/dbu, -w/2.0 -  5/dbu)
     shapes(LayervlN).insert(boxVL3)
     shapes(LayerPinRecN).insert(boxVL3)
-    shapes(LayerPinRecN).insert(pya.Text ("elec2h2", pya.Trans(pya.Trans.R0,x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
-    boxVL4 = pya.Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 7.5/dbu, -w/2.0 -  10/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi) - 2.5/dbu, -w/2.0 -  5/dbu)
+    shapes(LayerPinRecN).insert(Text ("elec2h2", Trans(Trans.R0,x0+(r_mh_in)*cos(angle_min_MH/180*pi) + 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
+    boxVL4 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 7.5/dbu, -w/2.0 -  10/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi) - 2.5/dbu, -w/2.0 -  5/dbu)
     shapes(LayervlN).insert(boxVL4)
     shapes(LayerPinRecN).insert(boxVL4)
-    shapes(LayerPinRecN).insert(pya.Text ("elec2h1", pya.Trans(pya.Trans.R0,x0-(r_mh_in)*cos(angle_min_MH/180*pi) - 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Text ("elec2h1", Trans(Trans.R0,x0-(r_mh_in)*cos(angle_min_MH/180*pi) - 5.0/dbu,-w/2.0 -  7.5/dbu))).text_size = 0.5/dbu
 
     #Create the MH Layer
-    self.cell.shapes(LayermhN).insert(pya.Path(arc(r_mh, angle_min_MH, angle_max_MH), w_mh).transformed(t).simple_polygon())
-    boxMH1 = pya.Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + w_mh, y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
+    self.cell.shapes(LayermhN).insert(Path(arc(r_mh, angle_min_MH, angle_max_MH), w_mh).transformed(t).simple_polygon())
+    boxMH1 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + w_mh, y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
     shapes(LayermhN).insert(boxMH1)
-    boxMH2 = pya.Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)  - w_mh, -w/2.0 -  2.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
+    boxMH2 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)  - w_mh, -w/2.0 -  2.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), y0 +(r_mh_in)*sin(angle_min_MH/180*pi))
     shapes(LayermhN).insert(boxMH2)
-    boxMH3 = pya.Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  12.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 10/dbu, -w/2.0 -  2.5/dbu)
+    boxMH3 = Box(x0+(r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  12.5/dbu, x0 + (r_mh_in)*cos(angle_min_MH/180*pi) + 10/dbu, -w/2.0 -  2.5/dbu)
     shapes(LayermhN).insert(boxMH3)
-    boxMH4 = pya.Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 10/dbu, -w/2.0 -  12.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu)
+    boxMH4 = Box(x0-(r_mh_in)*cos(angle_min_MH/180*pi)- 10/dbu, -w/2.0 -  12.5/dbu, x0 - (r_mh_in)*cos(angle_min_MH/180*pi), -w/2.0 -  2.5/dbu)
     shapes(LayermhN).insert(boxMH4)
     
     # Create the pins, as short paths:
     from SiEPIC._globals import PIN_LENGTH as pin_length
         
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2. + taper_length) + pin_length/2., 0),
-                                          pya.Point(x0 - (w_Si3 / 2. + taper_length) - pin_length/2., 0)], w))
-    shapes(LayerPinRecN).insert(pya.Text("opt1", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2. + taper_length), 0))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Path([Point(x0 - (w_Si3 / 2. + taper_length) + pin_length/2., 0),
+                                          Point(x0 - (w_Si3 / 2. + taper_length) - pin_length/2., 0)], w))
+    shapes(LayerPinRecN).insert(Text("opt1", Trans(Trans.R0,x0 - (w_Si3 / 2. + taper_length), 0))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2. + taper_length) - pin_length/2., 0),
-                                          pya.Point(x0 + (w_Si3 / 2. + taper_length)           + pin_length/2., 0)], w))
-    shapes(LayerPinRecN).insert(pya.Text("opt2", pya.Trans(pya.Trans.R0,x0 + (w_Si3 / 2. + taper_length), 0))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Path([Point(x0 + (w_Si3 / 2. + taper_length) - pin_length/2., 0),
+                                          Point(x0 + (w_Si3 / 2. + taper_length)           + pin_length/2., 0)], w))
+    shapes(LayerPinRecN).insert(Text("opt2", Trans(Trans.R0,x0 + (w_Si3 / 2. + taper_length), 0))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 - (w_Si3 / 2. + taper_length) + pin_length/2., y_offset),
-                                          pya.Point(x0 - (w_Si3 / 2. + taper_length) - pin_length/2., y_offset)], w))
-    shapes(LayerPinRecN).insert(pya.Text("opt3", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2. + taper_length), y_offset))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Path([Point(x0 - (w_Si3 / 2. + taper_length) + pin_length/2., y_offset),
+                                          Point(x0 - (w_Si3 / 2. + taper_length) - pin_length/2., y_offset)], w))
+    shapes(LayerPinRecN).insert(Text("opt3", Trans(Trans.R0,x0 - (w_Si3 / 2. + taper_length), y_offset))).text_size = 0.5/dbu
 
-    shapes(LayerPinRecN).insert(pya.Path([pya.Point(x0 + (w_Si3 / 2. + taper_length) - pin_length/2., y_offset),
-                                          pya.Point(x0 + (w_Si3 / 2. + taper_length) + pin_length/2., y_offset)], w))
-    shapes(LayerPinRecN).insert(pya.Text("opt4", pya.Trans(pya.Trans.R0,x0 + (w_Si3 / 2. + taper_length), y_offset))).text_size = 0.5/dbu
+    shapes(LayerPinRecN).insert(Path([Point(x0 + (w_Si3 / 2. + taper_length) - pin_length/2., y_offset),
+                                          Point(x0 + (w_Si3 / 2. + taper_length) + pin_length/2., y_offset)], w))
+    shapes(LayerPinRecN).insert(Text("opt4", Trans(Trans.R0,x0 + (w_Si3 / 2. + taper_length), y_offset))).text_size = 0.5/dbu
 
     # Create the device recognition layer
-    shapes(LayerDevRecN).insert(pya.Box(x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu, x0 + (w_Si3 / 2 + taper_length), y0 + r_m1_out + w_m1_out+h_via ))
+    shapes(LayerDevRecN).insert(Box(x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu, x0 + (w_Si3 / 2 + taper_length), y0 + r_m1_out + w_m1_out+h_via ))
 
     # Compact model information
-    shape = shapes(LayerDevRecN).insert(pya.Text('Lumerical_INTERCONNECT_library=Design kits/GSiP', \
-      pya.Trans(pya.Trans.R0,0, 0))).text_size = 0.3/dbu
-    shapes(LayerDevRecN).insert(pya.Text('Component=Ring_Modulator_DB', \
-      pya.Trans(pya.Trans.R0,0, w*2))).text_size = 0.3/dbu
-    shapes(LayerDevRecN).insert(pya.Text('Component_ID=%s' % self.component_ID, \
-      pya.Trans(pya.Trans.R0,0, w*4))).text_size = 0.3/dbu
-    shapes(LayerDevRecN).insert(pya.Text \
+    shape = shapes(LayerDevRecN).insert(Text('Lumerical_INTERCONNECT_library=Design kits/GSiP', \
+      Trans(Trans.R0,0, 0))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text('Component=Ring_Modulator_DB', \
+      Trans(Trans.R0,0, w*2))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text('Component_ID=%s' % self.component_ID, \
+      Trans(Trans.R0,0, w*4))).text_size = 0.3/dbu
+    shapes(LayerDevRecN).insert(Text \
       ('Spice_param:radius=%.3fu wg_width=%.3fu gap=%.3fu gap_monitor=%.3fu' %\
       (self.r, self.w, self.g, self.gmon), \
-      pya.Trans(pya.Trans.R0,0, -w*2) ) ).text_size = 0.3/dbu
+      Trans(Trans.R0,0, -w*2) ) ).text_size = 0.3/dbu
     
     # Add a polygon text description
     from SiEPIC.utils import layout_pgtext
     if self.textpolygon : layout_pgtext(self.cell, self.textl, self.w, self.r+self.w, "%.3f-%g" % ( self.r, self.g), 1)
 
     # Reference publication:
-    shapes(TextLayerN).insert(pya.Text ("Ref: Raphael Dube-Demers, JLT, 2015", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu+4.0/dbu))).text_size = 0.7/dbu
-    shapes(TextLayerN).insert(pya.Text ("http://dx.doi.org/10.1109/JLT.2015.2462804", pya.Trans(pya.Trans.R0,x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu+1.0/dbu))).text_size = 0.7/dbu
+    shapes(TextLayerN).insert(Text ("Ref: Raphael Dube-Demers, JLT, 2015", Trans(Trans.R0,x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu+4.0/dbu))).text_size = 0.7/dbu
+    shapes(TextLayerN).insert(Text ("http://dx.doi.org/10.1109/JLT.2015.2462804", Trans(Trans.R0,x0 - (w_Si3 / 2 + taper_length), -w/2.0 -  12.5/dbu+1.0/dbu))).text_size = 0.7/dbu
