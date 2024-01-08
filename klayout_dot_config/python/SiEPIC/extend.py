@@ -2393,19 +2393,19 @@ dbu float-int extension:
 """
 
 
-def to_dbu(f, dbu):
+def to_dbu(f, dbu=0.001):
     return int(round(f / dbu))
 
 
-def to_itype(f, dbu):
+def to_itype(f, dbu=0.001):
     if type(f) == str:
         f = float(f)
     return int(round(f / dbu))
 
 
-def from_dbu(i, dbu):
+def from_dbu(i, dbu=0.001):
     return i * dbu
 
 
-def to_dtype(i, dbu):
+def to_dtype(i, dbu=0.001):
     return i * dbu
