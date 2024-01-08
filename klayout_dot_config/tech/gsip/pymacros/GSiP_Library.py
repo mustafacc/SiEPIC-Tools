@@ -6,7 +6,11 @@ Lukas Chrostowski (c) 2015-2024
 folder = 'pcells_GSiP'
 verbose = False
 
-import os, sys, pathlib
+import os
+import sys
+import pathlib
+import pya
+import fnmatch
 
 from SiEPIC._globals import KLAYOUT_VERSION, KLAYOUT_VERSION_3
 if KLAYOUT_VERSION < 28:
@@ -37,8 +41,6 @@ for f in files:
         print(m)
     pcells_.append(importlib.reload(m))
 
-import pya
-
 class GSiP(pya.Library):
   def __init__(self):
     tech_name = "GSiP"
@@ -53,11 +55,9 @@ class GSiP(pya.Library):
     self.description = "SiEPIC Generic SiP"
 
     # Save the path, used for loading WAVEGUIDES.XML
-    import os
     self.path = os.path.dirname(os.path.realpath(__file__))
 
     # Import all the GDS files from the tech folder
-    import os, fnmatch
     dir_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../gds/building_blocks"))
     if verbose:
         print('  library path: %s' % dir_path)
