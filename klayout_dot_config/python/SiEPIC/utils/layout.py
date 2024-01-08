@@ -1514,25 +1514,33 @@ def y_splitter_tree(
     return inst_in, inst_out, cell_tree
 
 
-def floorplan(topcell, x, y):
+def floorplan(topcell, x, y, layername='FloorPlan'):
     """Create a FloorPlan, from (0,0) to (x,y)
     by Lukas Chrostowski, 2023, SiEPIC-Tools
     """
     ly = topcell.layout()
-    cell = ly.create_cell("FloorPlan")
+    cell = ly.create_cell(layername)
     topcell.insert(pya.CellInstArray(cell.cell_index(), pya.Vector(0, 0)))
     box = pya.Box(0, 0, x, y)
-    cell.shapes(ly.layer(ly.TECHNOLOGY["FloorPlan"])).insert(box)
+    cell.shapes(ly.layer(ly.TECHNOLOGY[layername])).insert(box)
 
 
-def new_layout(tech, topcell_name, GUI=True, overwrite=False):
+def new_layout(tech, topcell_name, overwrite=False):
     """Create a new layout either in KLayout Application mode or in PyPI mode.
     Create the layout in the Application MainWindow (GUI=True) or in memory only (GUI=False)
     in Application mode,
       (overwrite = False): creates a new Layout View
       (overwrite = True): clears the existing layout,
         only if the topcell_name matches the existing one
-    by Lukas Chrostowski, 2023, SiEPIC-Tools
+
+
+    Args:
+        tech (_type_): _description_
+        topcell_name (_type_): _description_
+        overwrite (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        _type_: _description_
     """
 
     from SiEPIC.utils import get_layout_variables, get_technology_by_name
@@ -1540,7 +1548,7 @@ def new_layout(tech, topcell_name, GUI=True, overwrite=False):
 
     # this script can be run inside KLayout's GUI application, or
     # or from the command line: klayout -zz -r H3LoQP.py
-    if Python_Env == "KLayout_GUI" and GUI:
+    if Python_Env == "KLayout_GUI":
         mw = pya.Application().instance().main_window()
         if (
             overwrite
