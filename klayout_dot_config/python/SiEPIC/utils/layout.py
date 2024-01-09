@@ -1514,7 +1514,7 @@ def y_splitter_tree(
     return inst_in, inst_out, cell_tree
 
 
-def floorplan(topcell, x, y, layername='FloorPlan'):
+def floorplan(topcell, x, y, layername="FloorPlan"):
     """Create a FloorPlan, from (0,0) to (x,y)
     by Lukas Chrostowski, 2023, SiEPIC-Tools
     """
