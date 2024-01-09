@@ -10,7 +10,7 @@ authors = ["Lukas Chrostowski <lukasc@ece.ubc.ca>"]
 license = "MIT License"
 readme = "README.md"
 packages = [
-    { include = "siepic", from="klayout_dot_config/python"},
+    { include = "SiEPIC", from="klayout_dot_config/python"},
     { include = "gsip", from="klayout_dot_config/tech"}
 ]
 
