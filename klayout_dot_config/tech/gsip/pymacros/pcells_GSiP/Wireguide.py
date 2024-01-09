@@ -1,10 +1,10 @@
 from pya import (
-    PCellDeclarationHelper, 
-    DPath, 
-    DPoint, 
-    Trans, 
-    Path, 
-    Point, 
+    PCellDeclarationHelper,
+    DPath,
+    DPoint,
+    Trans,
+    Path,
+    Point,
     Text,
 )
 from SiEPIC.extend import to_itype
@@ -16,6 +16,7 @@ from SiEPIC.utils import (
     angle_b_vectors,
     inner_angle_b_vectors,
 )
+
 
 class Wireguide(PCellDeclarationHelper):
     # RIT Integrated Photonics Group (Karl McNulty)
@@ -55,7 +56,6 @@ class Wireguide(PCellDeclarationHelper):
         self.path = self.shape.dpath
 
     def produce_impl(self):
-
         print("GSiP.Wireguide")
 
         TECHNOLOGY = get_technology_by_name("GSiP")

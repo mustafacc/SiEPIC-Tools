@@ -2,6 +2,7 @@ from pya import PCellDeclarationHelper, Polygon
 from SiEPIC.utils import get_technology_by_name, arc
 from SiEPIC.extend import to_itype
 
+
 class Ring(PCellDeclarationHelper):
     def __init__(self):
         # Important: initialize the super class
@@ -21,7 +22,6 @@ class Ring(PCellDeclarationHelper):
         pass
 
     def produce_impl(self):
-
         dbu = self.layout.dbu
 
         layer = self.layout.layer(self.layer)

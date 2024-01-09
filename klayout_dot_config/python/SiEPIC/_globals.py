@@ -1,4 +1,5 @@
 import pya
+import logging
 
 Python_Env = ""  # tag which defines whether we are loading library in script or GUI env
 if "Application" in dir(pya):
@@ -6,12 +7,13 @@ if "Application" in dir(pya):
         # import pya, which is available when running within KLayout
         if pya.Application.instance().main_window():
             Python_Env = "KLayout_GUI"
-            print("Python Environment: KLayout GUI")
+            logging.info("Python Environment: KLayout GUI")
         else:
             Python_Env = "KLayout_batch"
-            print("Python Environment: KLayout batch mode")
+            logging.info("Python Environment: KLayout batch mode")
     except:
         Python_Env = "Script"
+        logging.info("Python Environment: python-only script mode")
 else:
     Python_Env = "Script"
 
@@ -65,7 +67,7 @@ except ImportError:
     try:
         MODULE_NUMPY = install("numpy")
     except Exception as e:
-        print("Could not install numpy with pip. ERROR:", e)
+        logging.error("Could not install numpy with pip. ERROR:", e)
 
 # scipy
 try:
@@ -76,7 +78,7 @@ except ImportError:
     try:
         install("scipy")
     except Exception as e:
-        print("Could not install scipy with pip. ERROR:", e)
+        logging.error("Could not install scipy with pip. ERROR:", e)
 
 
 # ACTIONS = []
@@ -115,25 +117,25 @@ if Python_Env == "KLayout_GUI":
         INTC
     except:
         INTC = None
-        print("resetting Lumerical INTERCONNECT Python integration")
+        logging.warning("resetting Lumerical INTERCONNECT Python integration")
 
     try:
         FDTD
     except:
         FDTD = None
-        print("resetting Lumerical FDTD Python integration")
+        logging.warning("resetting Lumerical FDTD Python integration")
 
     try:
         MODE
     except:
         MODE = None
-        print("resetting Lumerical MODE Python integration")
+        logging.warning("resetting Lumerical MODE Python integration")
 
     try:
         LUMAPI
     except:
         LUMAPI = None
-        print("resetting Lumerical Python integration")
+        logging.warning("resetting Lumerical Python integration")
 
 if "TEMP_FOLDER" not in locals():
     import tempfile
