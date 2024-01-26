@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <salt-grain>
  <name>siepic_tools</name>
- <version>0.5.4</version>
- <api-version>0.27</api-version>
+ <version>0.6.0</version>
+ <api-version>0.28</api-version>
  <title>SiEPIC Tools</title>
  <doc>Tools for designing Silicon Photonic Integrated Circuits, including waveguides, component simulations, functional verification, DRC verification, Functional verification, netlist extraction, circuit simulations. Layout can be implemented graphically or by programming in Python using the SiEPIC functions and KLayout Python API. Framework and examples for creating layouts using scripts. Includes a generic PDK (GSiP). Other PDKs are installed separately, and depend on SiEPIC-Tools.</doc>
  <doc-url>https://github.com/siepic/SiEPIC-Tools/blob/master/README.md</doc-url>
@@ -16,10 +16,4 @@
   <url/>
   <version>1.2</version>
  </depends>
- <!-- <depends>
-  <name>Windows_Python_packages_for_KLayout</name>
-  <url/>
-  <version>1.0</version>
- </depends>
--->
 </salt-grain>
