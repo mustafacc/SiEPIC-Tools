@@ -1,19 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <waveguides>
-
   <waveguide>
-    <name>Strip</name>
-    <crossing_cell>ebeam_crossing4</crossing_cell>
+    <name>Strip TE 1550 nm</name>
+    <wg_width>0.5</wg_width>
     <bezier>0.35</bezier>
     <radius>5.0</radius>
+    <crossing_cell>ebeam_crossing4</crossing_cell>
     <component>
       <layer>Si</layer>
       <width>0.5</width>
       <offset>0.0</offset>
     </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
   </waveguide>
+
+  <waveguide>
+    <name>Strip TE 1310 nm</name>
+    <wg_width>0.35</wg_width>
+    <bezier>0.35</bezier>
+    <radius>5.0</radius>
+    <component>
+      <layer>Si</layer>
+      <width>0.35</width>
+      <offset>0.0</offset>
+    </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+  </waveguide>
+
+  <waveguide>
+    <name>Rib TE 1550 nm</name>
+    <wg_width>0.5</wg_width>
+    <radius>15.0</radius>
+    <component>
+      <layer>Si</layer>
+      <width>0.5</width>
+      <offset>0.0</offset>
+    </component>
+    <component>
+      <layer>SiEtch1</layer>
+      <width>2.0</width>
+      <offset>0.0</offset>
+    </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+  </waveguide>
+
+  <waveguide>
+    <name>Double Rib with 150 nm step and 90 nm slab</name>
+    <wg_width>0.5</wg_width>
+    <radius>10.0</radius>
+    <component>
+      <layer>Si</layer>
+      <width>0.5</width>
+      <offset>0.0</offset>
+    </component>
+    <component>
+      <layer>SiEtch1</layer>
+      <width>0.7</width>
+      <offset>0.0</offset>
+    </component>
+    <component>
+      <layer>SiEtch2</layer>
+      <width>2.0</width>
+      <offset>0.0</offset>
+    </component>
+	  <component>
+	    <layer>DevRec</layer>
+	    <width>1.5</width>
+	    <offset>0.0</offset>
+	  </component>
+  </waveguide> 
+
   <waveguide>
     <name>Slot</name>
+    <wg_width>0.5</wg_width>
     <radius>20.0</radius>
     <component>
       <layer>Si</layer>
@@ -31,42 +102,10 @@
 	    <offset>0.0</offset>
 	  </component>
   </waveguide>
-  <waveguide>
-    <name>Ridge</name>
-    <radius>15.0</radius>
-    <component>
-      <layer>Si</layer>
-      <width>0.5</width>
-      <offset>0.0</offset>
-    </component>
-    <component>
-      <layer>SiEtch2</layer>
-      <width>2.0</width>
-      <offset>0.0</offset>
-    </component>
-	  <component>
-	    <layer>DevRec</layer>
-	    <width>1.5</width>
-	    <offset>0.0</offset>
-	  </component>
-  </waveguide>
-  <waveguide>
-    <name>Strip TE 1310 nm</name>
-    <bezier>0.35</bezier>
-    <radius>5.0</radius>
-    <component>
-      <layer>Si</layer>
-      <width>0.35</width>
-      <offset>0.0</offset>
-    </component>
-	  <component>
-	    <layer>DevRec</layer>
-	    <width>1.5</width>
-	    <offset>0.0</offset>
-	  </component>
-  </waveguide>
+
   <waveguide>
     <name>Strip TE 2900 nm</name>
+    <wg_width>1.00</wg_width>
     <bezier>0.35</bezier>
     <radius>15.0</radius>
     <component>
@@ -80,63 +119,5 @@
 	    <offset>0.0</offset>
 	  </component>
   </waveguide>
-  <waveguide>
-    <name>Strip TE 1550 nm</name>
-    <bezier>0.35</bezier>
-    <radius>5.0</radius>
-    <crossing_cell>ebeam_crossing4</crossing_cell>
-    <component>
-      <layer>Si</layer>
-      <width>0.5</width>
-      <offset>0.0</offset>
-    </component>
-	  <component>
-	    <layer>DevRec</layer>
-	    <width>1.5</width>
-	    <offset>0.0</offset>
-	  </component>
-  </waveguide>
-  <waveguide>
-    <name>Rib with 90 nm slab</name>
-    <radius>10.0</radius>
-    <component>
-      <layer>Si</layer>
-      <width>0.5</width>
-      <offset>0.0</offset>
-    </component>
-    <component>
-      <layer>SiEtch1</layer>
-      <width>2.0</width>
-      <offset>0.0</offset>
-    </component>
-	  <component>
-	    <layer>DevRec</layer>
-	    <width>1.5</width>
-	    <offset>0.0</offset>
-	  </component>
-  </waveguide>
-  <waveguide>
-    <name>Double Rib with 150 nm step and 90 nm slab</name>
-    <radius>10.0</radius>
-    <component>
-      <layer>Si</layer>
-      <width>0.5</width>
-      <offset>0.0</offset>
-    </component>
-    <component>
-      <layer>SiEtch2</layer>
-      <width>0.7</width>
-      <offset>0.0</offset>
-    </component>
-    <component>
-      <layer>SiEtch1</layer>
-      <width>2.0</width>
-      <offset>0.0</offset>
-    </component>
-	  <component>
-	    <layer>DevRec</layer>
-	    <width>1.5</width>
-	    <offset>0.0</offset>
-	  </component>
-  </waveguide> 
+
 </waveguides>
