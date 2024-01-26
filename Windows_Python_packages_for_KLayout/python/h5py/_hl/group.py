@@ -28,12 +28,10 @@ from .vds import vds_support
 
 class Group(HLObject, MutableMappingHDF5):
 
-    """ Represents an HDF5 group.
-    """
+    """Represents an HDF5 group."""
 
     def __init__(self, bind):
-        """ Create a new Group object by binding to a low-level GroupID.
-        """
+        """Create a new Group object by binding to a low-level GroupID."""
         with phil:
             if not isinstance(bind, h5g.GroupID):
                 raise ValueError("%s is not a GroupID" % bind)
@@ -41,12 +39,14 @@ class Group(HLObject, MutableMappingHDF5):
 
     _gcpl_crt_order = h5p.create(h5p.GROUP_CREATE)
     _gcpl_crt_order.set_link_creation_order(
-        h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
+        h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED
+    )
     _gcpl_crt_order.set_attr_creation_order(
-        h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
+        h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED
+    )
 
     def create_group(self, name, track_order=None):
-        """ Create and return a new subgroup.
+        """Create and return a new subgroup.
 
         Name may be absolute or relative.  Fails if the target name already
         exists.
@@ -65,7 +65,7 @@ class Group(HLObject, MutableMappingHDF5):
             return Group(gid)
 
     def create_dataset(self, name, shape=None, dtype=None, data=None, **kwds):
-        """ Create a new HDF5 dataset
+        """Create a new HDF5 dataset
 
         name
             Name of the dataset (absolute or relative).  Provide None to make
@@ -163,21 +163,21 @@ class Group(HLObject, MutableMappingHDF5):
             approximately 100 times that number of chunks. The default value is
             521.
         """
-        if 'track_order' not in kwds:
-            kwds['track_order'] = h5.get_config().track_order
+        if "track_order" not in kwds:
+            kwds["track_order"] = h5.get_config().track_order
 
-        if 'efile_prefix' in kwds:
-            kwds['efile_prefix'] = self._e(kwds['efile_prefix'])
+        if "efile_prefix" in kwds:
+            kwds["efile_prefix"] = self._e(kwds["efile_prefix"])
 
-        if 'virtual_prefix' in kwds:
-            kwds['virtual_prefix'] = self._e(kwds['virtual_prefix'])
+        if "virtual_prefix" in kwds:
+            kwds["virtual_prefix"] = self._e(kwds["virtual_prefix"])
 
         with phil:
             group = self
             if name:
                 name = self._e(name)
-                if b'/' in name.lstrip(b'/'):
-                    parent_path, name = name.rsplit(b'/', 1)
+                if b"/" in name.lstrip(b"/"):
+                    parent_path, name = name.rsplit(b"/", 1)
                     group = self.require_group(parent_path)
 
             dsid = dataset.make_new_dset(group, shape, dtype, data, name, **kwds)
@@ -185,6 +185,7 @@ class Group(HLObject, MutableMappingHDF5):
             return dset
 
     if vds_support:
+
         def create_virtual_dataset(self, name, layout, fillvalue=None):
             """Create a new virtual dataset in this group.
 
@@ -205,12 +206,14 @@ class Group(HLObject, MutableMappingHDF5):
 
                 if name:
                     name = self._e(name)
-                    if b'/' in name.lstrip(b'/'):
-                        parent_path, name = name.rsplit(b'/', 1)
+                    if b"/" in name.lstrip(b"/"):
+                        parent_path, name = name.rsplit(b"/", 1)
                         group = self.require_group(parent_path)
 
                 dsid = layout.make_dataset(
-                    group, name=name, fillvalue=fillvalue,
+                    group,
+                    name=name,
+                    fillvalue=fillvalue,
                 )
                 dset = dataset.Dataset(dsid)
 
@@ -218,7 +221,7 @@ class Group(HLObject, MutableMappingHDF5):
 
         @contextmanager
         def build_virtual_dataset(
-                self, name, shape, dtype, maxshape=None, fillvalue=None
+            self, name, shape, dtype, maxshape=None, fillvalue=None
         ):
             """Assemble a virtual dataset in this group.
 
@@ -240,13 +243,14 @@ class Group(HLObject, MutableMappingHDF5):
                 The value used where no data is available.
             """
             from .vds import VirtualLayout
+
             layout = VirtualLayout(shape, dtype, maxshape, self.file.filename)
             yield layout
 
             self.create_virtual_dataset(name, layout, fillvalue)
 
     def require_dataset(self, name, shape, dtype, exact=False, **kwds):
-        """ Open a dataset, creating it if it doesn't exist.
+        """Open a dataset, creating it if it doesn't exist.
 
         If keyword "exact" is False (default), an existing dataset must have
         the same shape and a conversion-compatible dtype to be returned.  If
@@ -264,11 +268,11 @@ class Group(HLObject, MutableMappingHDF5):
         Raises TypeError if an incompatible object already exists, or if the
         shape, maxshape or dtype don't match according to the above rules.
         """
-        if 'efile_prefix' in kwds:
-            kwds['efile_prefix'] = self._e(kwds['efile_prefix'])
+        if "efile_prefix" in kwds:
+            kwds["efile_prefix"] = self._e(kwds["efile_prefix"])
 
-        if 'virtual_prefix' in kwds:
-            kwds['virtual_prefix'] = self._e(kwds['virtual_prefix'])
+        if "virtual_prefix" in kwds:
+            kwds["virtual_prefix"] = self._e(kwds["virtual_prefix"])
 
         with phil:
             if name not in self:
@@ -282,24 +286,38 @@ class Group(HLObject, MutableMappingHDF5):
                 dset = dataset.Dataset(dsid)
             except KeyError:
                 dset = self[name]
-                raise TypeError("Incompatible object (%s) already exists" % dset.__class__.__name__)
+                raise TypeError(
+                    "Incompatible object (%s) already exists" % dset.__class__.__name__
+                )
 
             if shape != dset.shape:
                 if "maxshape" not in kwds:
-                    raise TypeError("Shapes do not match (existing %s vs new %s)" % (dset.shape, shape))
+                    raise TypeError(
+                        "Shapes do not match (existing %s vs new %s)"
+                        % (dset.shape, shape)
+                    )
                 elif kwds["maxshape"] != dset.maxshape:
-                    raise TypeError("Max shapes do not match (existing %s vs new %s)" % (dset.maxshape, kwds["maxshape"]))
+                    raise TypeError(
+                        "Max shapes do not match (existing %s vs new %s)"
+                        % (dset.maxshape, kwds["maxshape"])
+                    )
 
             if exact:
                 if dtype != dset.dtype:
-                    raise TypeError("Datatypes do not exactly match (existing %s vs new %s)" % (dset.dtype, dtype))
+                    raise TypeError(
+                        "Datatypes do not exactly match (existing %s vs new %s)"
+                        % (dset.dtype, dtype)
+                    )
             elif not numpy.can_cast(dtype, dset.dtype):
-                raise TypeError("Datatypes cannot be safely cast (existing %s vs new %s)" % (dset.dtype, dtype))
+                raise TypeError(
+                    "Datatypes cannot be safely cast (existing %s vs new %s)"
+                    % (dset.dtype, dtype)
+                )
 
             return dset
 
     def create_dataset_like(self, name, other, **kwupdate):
-        """ Create a dataset similar to `other`.
+        """Create a dataset similar to `other`.
 
         name
             Name of the dataset (absolute or relative).  Provide None to make
@@ -313,20 +331,28 @@ class Group(HLObject, MutableMappingHDF5):
         shape and dtype, in which case the provided values take precedence over
         those from `other`.
         """
-        for k in ('shape', 'dtype', 'chunks', 'compression',
-                  'compression_opts', 'scaleoffset', 'shuffle', 'fletcher32',
-                  'fillvalue'):
+        for k in (
+            "shape",
+            "dtype",
+            "chunks",
+            "compression",
+            "compression_opts",
+            "scaleoffset",
+            "shuffle",
+            "fletcher32",
+            "fillvalue",
+        ):
             kwupdate.setdefault(k, getattr(other, k))
         # TODO: more elegant way to pass these (dcpl to create_dataset?)
         dcpl = other.id.get_create_plist()
-        kwupdate.setdefault('track_times', dcpl.get_obj_track_times())
-        kwupdate.setdefault('track_order', dcpl.get_attr_creation_order() > 0)
+        kwupdate.setdefault("track_times", dcpl.get_obj_track_times())
+        kwupdate.setdefault("track_order", dcpl.get_attr_creation_order() > 0)
 
         # Special case: the maxshape property always exists, but if we pass it
         # to create_dataset, the new dataset will automatically get chunked
         # layout. So we copy it only if it is different from shape.
         if other.maxshape != other.shape:
-            kwupdate.setdefault('maxshape', other.maxshape)
+            kwupdate.setdefault("maxshape", other.maxshape)
 
         return self.create_dataset(name, **kwupdate)
 
@@ -342,12 +368,14 @@ class Group(HLObject, MutableMappingHDF5):
                 return self.create_group(name)
             grp = self[name]
             if not isinstance(grp, Group):
-                raise TypeError("Incompatible object (%s) already exists" % grp.__class__.__name__)
+                raise TypeError(
+                    "Incompatible object (%s) already exists" % grp.__class__.__name__
+                )
             return grp
 
     @with_phil
     def __getitem__(self, name):
-        """ Open an object in the file """
+        """Open an object in the file"""
 
         if isinstance(name, h5r.Reference):
             oid = h5r.dereference(name, self.id)
@@ -356,21 +384,23 @@ class Group(HLObject, MutableMappingHDF5):
         elif isinstance(name, (bytes, str)):
             oid = h5o.open(self.id, self._e(name), lapl=self._lapl)
         else:
-            raise TypeError("Accessing a group is done with bytes or str, "
-                            "not {}".format(type(name)))
+            raise TypeError(
+                "Accessing a group is done with bytes or str, "
+                "not {}".format(type(name))
+            )
 
         otype = h5i.get_type(oid)
         if otype == h5i.GROUP:
             return Group(oid)
         elif otype == h5i.DATASET:
-            return dataset.Dataset(oid, readonly=(self.file.mode == 'r'))
+            return dataset.Dataset(oid, readonly=(self.file.mode == "r"))
         elif otype == h5i.DATATYPE:
             return datatype.Datatype(oid)
         else:
             raise TypeError("Unknown object type")
 
     def get(self, name, default=None, getclass=False, getlink=False):
-        """ Retrieve an item or other information.
+        """Retrieve an item or other information.
 
         "name" given only:
             Return the item, or "default" if it doesn't exist
@@ -408,9 +438,11 @@ class Group(HLObject, MutableMappingHDF5):
                 typecode = h5o.get_info(self.id, self._e(name)).type
 
                 try:
-                    return {h5o.TYPE_GROUP: Group,
-                            h5o.TYPE_DATASET: dataset.Dataset,
-                            h5o.TYPE_NAMED_DATATYPE: datatype.Datatype}[typecode]
+                    return {
+                        h5o.TYPE_GROUP: Group,
+                        h5o.TYPE_DATASET: dataset.Dataset,
+                        h5o.TYPE_NAMED_DATATYPE: datatype.Datatype,
+                    }[typecode]
                 except KeyError:
                     raise TypeError("Unknown object type")
 
@@ -427,9 +459,7 @@ class Group(HLObject, MutableMappingHDF5):
                     if getclass:
                         return ExternalLink
                     filebytes, linkbytes = self.id.links.get_val(self._e(name))
-                    return ExternalLink(
-                        filename_decode(filebytes), self._d(linkbytes)
-                    )
+                    return ExternalLink(filename_decode(filebytes), self._d(linkbytes))
 
                 elif typecode == h5l.TYPE_HARD:
                     return HardLink if getclass else HardLink()
@@ -438,7 +468,7 @@ class Group(HLObject, MutableMappingHDF5):
                     raise TypeError("Unknown link type")
 
     def __setitem__(self, name, obj):
-        """ Add an object to the group.  The name must not already be in use.
+        """Add an object to the group.  The name must not already be in use.
 
         The action taken depends on the type of object assigned:
 
@@ -468,12 +498,15 @@ class Group(HLObject, MutableMappingHDF5):
                 h5o.link(obj.id, self.id, name, lcpl=lcpl, lapl=self._lapl)
 
             elif isinstance(obj, SoftLink):
-                self.id.links.create_soft(name, self._e(obj.path), lcpl=lcpl, lapl=self._lapl)
+                self.id.links.create_soft(
+                    name, self._e(obj.path), lcpl=lcpl, lapl=self._lapl
+                )
 
             elif isinstance(obj, ExternalLink):
                 fn = filename_encode(obj.filename)
-                self.id.links.create_external(name, fn, self._e(obj.path),
-                                              lcpl=lcpl, lapl=self._lapl)
+                self.id.links.create_external(
+                    name, fn, self._e(obj.path), lcpl=lcpl, lapl=self._lapl
+                )
 
             elif isinstance(obj, numpy.dtype):
                 htype = h5t.py_create(obj, logical=True)
@@ -485,73 +518,81 @@ class Group(HLObject, MutableMappingHDF5):
 
     @with_phil
     def __delitem__(self, name):
-        """ Delete (unlink) an item from this group. """
+        """Delete (unlink) an item from this group."""
         self.id.unlink(self._e(name))
 
     @with_phil
     def __len__(self):
-        """ Number of members attached to this group """
+        """Number of members attached to this group"""
         return self.id.get_num_objs()
 
     @with_phil
     def __iter__(self):
-        """ Iterate over member names """
+        """Iterate over member names"""
         for x in self.id.__iter__():
             yield self._d(x)
 
     @with_phil
     def __reversed__(self):
-        """ Iterate over member names in reverse order. """
+        """Iterate over member names in reverse order."""
         for x in self.id.__reversed__():
             yield self._d(x)
 
     @with_phil
     def __contains__(self, name):
-        """ Test if a member name exists """
+        """Test if a member name exists"""
         return self._e(name) in self.id
 
-    def copy(self, source, dest, name=None,
-             shallow=False, expand_soft=False, expand_external=False,
-             expand_refs=False, without_attrs=False):
+    def copy(
+        self,
+        source,
+        dest,
+        name=None,
+        shallow=False,
+        expand_soft=False,
+        expand_external=False,
+        expand_refs=False,
+        without_attrs=False,
+    ):
         """Copy an object or group.
 
-        The source can be a path, Group, Dataset, or Datatype object.  The
-        destination can be either a path or a Group object.  The source and
-        destinations need not be in the same file.
+         The source can be a path, Group, Dataset, or Datatype object.  The
+         destination can be either a path or a Group object.  The source and
+         destinations need not be in the same file.
 
-        If the source is a Group object, all objects contained in that group
-        will be copied recursively.
+         If the source is a Group object, all objects contained in that group
+         will be copied recursively.
 
-        When the destination is a Group object, by default the target will
-        be created in that group with its current name (basename of obj.name).
-        You can override that by setting "name" to a string.
+         When the destination is a Group object, by default the target will
+         be created in that group with its current name (basename of obj.name).
+         You can override that by setting "name" to a string.
 
-        There are various options which all default to "False":
+         There are various options which all default to "False":
 
-         - shallow: copy only immediate members of a group.
+          - shallow: copy only immediate members of a group.
 
-         - expand_soft: expand soft links into new objects.
+          - expand_soft: expand soft links into new objects.
 
-         - expand_external: expand external links into new objects.
+          - expand_external: expand external links into new objects.
 
-         - expand_refs: copy objects that are pointed to by references.
+          - expand_refs: copy objects that are pointed to by references.
 
-         - without_attrs: copy object without copying attributes.
+          - without_attrs: copy object without copying attributes.
 
-       Example:
+        Example:
 
-        >>> f = File('myfile.hdf5', 'w')
-        >>> f.create_group("MyGroup")
-        >>> list(f.keys())
-        ['MyGroup']
-        >>> f.copy('MyGroup', 'MyCopy')
-        >>> list(f.keys())
-        ['MyGroup', 'MyCopy']
+         >>> f = File('myfile.hdf5', 'w')
+         >>> f.create_group("MyGroup")
+         >>> list(f.keys())
+         ['MyGroup']
+         >>> f.copy('MyGroup', 'MyCopy')
+         >>> list(f.keys())
+         ['MyGroup', 'MyCopy']
 
         """
         with phil:
             if isinstance(source, HLObject):
-                source_path = '.'
+                source_path = "."
             else:
                 # Interpret source as a path relative to this group
                 source_path = source
@@ -560,7 +601,7 @@ class Group(HLObject, MutableMappingHDF5):
             if isinstance(dest, Group):
                 if name is not None:
                     dest_path = name
-                elif source_path == '.':
+                elif source_path == ".":
                     dest_path = pp.basename(h5i.get_name(source.id))
                 else:
                     # copy source into dest group: dest_name/source_name
@@ -590,11 +631,17 @@ class Group(HLObject, MutableMappingHDF5):
             else:
                 copypl = None
 
-            h5o.copy(source.id, self._e(source_path), dest.id, self._e(dest_path),
-                     copypl, base.dlcpl)
+            h5o.copy(
+                source.id,
+                self._e(source_path),
+                dest.id,
+                self._e(dest_path),
+                copypl,
+                base.dlcpl,
+            )
 
     def move(self, source, dest):
-        """ Move a link to a new location in the file.
+        """Move a link to a new location in the file.
 
         If "source" is a hard link, this effectively renames the object.  If
         "source" is a soft or external link, the link itself is moved, with its
@@ -603,11 +650,16 @@ class Group(HLObject, MutableMappingHDF5):
         with phil:
             if source == dest:
                 return
-            self.id.links.move(self._e(source), self.id, self._e(dest),
-                               lapl=self._lapl, lcpl=self._lcpl)
+            self.id.links.move(
+                self._e(source),
+                self.id,
+                self._e(dest),
+                lapl=self._lapl,
+                lcpl=self._lcpl,
+            )
 
     def visit(self, func):
-        """ Recursively visit all names in this group and subgroups (HDF5 1.8).
+        """Recursively visit all names in this group and subgroups (HDF5 1.8).
 
         You supply a callable (function, method or callable object); it
         will be called exactly once for each link in this group and every
@@ -627,13 +679,15 @@ class Group(HLObject, MutableMappingHDF5):
         >>> f.visit(list_of_names.append)
         """
         with phil:
+
             def proxy(name):
-                """ Call the function with the text name, not bytes """
+                """Call the function with the text name, not bytes"""
                 return func(self._d(name))
+
             return h5o.visit(self.id, proxy)
 
     def visititems(self, func):
-        """ Recursively visit names and objects in this group (HDF5 1.8).
+        """Recursively visit names and objects in this group (HDF5 1.8).
 
         You supply a callable (function, method or callable object); it
         will be called exactly once for each link in this group and every
@@ -657,21 +711,21 @@ class Group(HLObject, MutableMappingHDF5):
         >>> f.visititems(func)
         """
         with phil:
+
             def proxy(name):
-                """ Use the text name of the object, not bytes """
+                """Use the text name of the object, not bytes"""
                 name = self._d(name)
                 return func(name, self[name])
+
             return h5o.visit(self.id, proxy)
 
     @with_phil
     def __repr__(self):
         if not self:
-            r = u"<Closed HDF5 group>"
+            r = "<Closed HDF5 group>"
         else:
-            namestr = (
-                '"%s"' % self.name
-            ) if self.name is not None else u"(anonymous)"
-            r = '<HDF5 group %s (%d members)>' % (namestr, len(self))
+            namestr = ('"%s"' % self.name) if self.name is not None else "(anonymous)"
+            r = "<HDF5 group %s (%d members)>" % (namestr, len(self))
 
         return r
 
@@ -679,8 +733,8 @@ class Group(HLObject, MutableMappingHDF5):
 class HardLink:
 
     """
-        Represents a hard link in an HDF5 file.  Provided only so that
-        Group.get works in a sensible way.  Has no other function.
+    Represents a hard link in an HDF5 file.  Provided only so that
+    Group.get works in a sensible way.  Has no other function.
     """
 
     pass
@@ -689,14 +743,14 @@ class HardLink:
 class SoftLink:
 
     """
-        Represents a symbolic ("soft") link in an HDF5 file.  The path
-        may be absolute or relative.  No checking is performed to ensure
-        that the target actually exists.
+    Represents a symbolic ("soft") link in an HDF5 file.  The path
+    may be absolute or relative.  No checking is performed to ensure
+    that the target actually exists.
     """
 
     @property
     def path(self):
-        """ Soft link value.  Not guaranteed to be a valid path. """
+        """Soft link value.  Not guaranteed to be a valid path."""
         return self._path
 
     def __init__(self, path):
@@ -709,18 +763,18 @@ class SoftLink:
 class ExternalLink:
 
     """
-        Represents an HDF5 external link.  Paths may be absolute or relative.
-        No checking is performed to ensure either the target or file exists.
+    Represents an HDF5 external link.  Paths may be absolute or relative.
+    No checking is performed to ensure either the target or file exists.
     """
 
     @property
     def path(self):
-        """ Soft link path, i.e. the part inside the HDF5 file. """
+        """Soft link path, i.e. the part inside the HDF5 file."""
         return self._path
 
     @property
     def filename(self):
-        """ Path to the external HDF5 file in the filesystem. """
+        """Path to the external HDF5 file in the filesystem."""
         return self._filename
 
     def __init__(self, filename, path):
@@ -728,5 +782,4 @@ class ExternalLink:
         self._path = path
 
     def __repr__(self):
-        return '<ExternalLink to "%s" in file "%s"' % (self.path,
-                                                       self.filename)
+        return '<ExternalLink to "%s" in file "%s"' % (self.path, self.filename)

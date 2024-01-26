@@ -15,24 +15,25 @@ import unyt as u
 
 # Set up a temporary file for this example.
 tf = tempfile.TemporaryFile()
-f = h5py.File(tf, 'a')
+f = h5py.File(tf, "a")
 
 # Create some mock data with moderately complicated units (this is the
 # dimensional representation of Joules of energy).
-test_data = [1, 2, 3, 4, 5] * u.kg * ( u.m / u.s ) ** 2
+test_data = [1, 2, 3, 4, 5] * u.kg * (u.m / u.s) ** 2
 print(test_data.units)
 # kg*m**2/s**2
 
 # Create a data set to hold the numerical information:
-f.create_dataset('stored data', data=test_data)
+f.create_dataset("stored data", data=test_data)
 
 # Save the units information as a string in `attrs`.
-f['stored data'].attrs['units'] = str(test_data.units)
+f["stored data"].attrs["units"] = str(test_data.units)
 
 # Now recover the data, using the saved units information to reconstruct the
 # original quantities.
-reconstituted_data = u.unyt_array(f['stored data'],
-                                  units=f['stored data'].attrs['units'])
+reconstituted_data = u.unyt_array(
+    f["stored data"], units=f["stored data"].attrs["units"]
+)
 
 print(reconstituted_data.units)
 # kg*m**2/s**2

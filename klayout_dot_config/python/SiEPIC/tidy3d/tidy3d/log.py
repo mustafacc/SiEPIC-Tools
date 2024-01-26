@@ -9,7 +9,9 @@ FORMAT = "%(message)s"
 DEFAULT_LEVEL = "INFO"
 LOGGER_NAME = "tidy3d_logger"
 
-logging.basicConfig(level=DEFAULT_LEVEL, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(
+    level=DEFAULT_LEVEL, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+)
 
 # maps level string to level integer for python logging package
 LEVEL_MAP = {

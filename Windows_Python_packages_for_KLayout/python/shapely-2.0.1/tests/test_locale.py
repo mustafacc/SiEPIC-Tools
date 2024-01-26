@@ -1,5 +1,5 @@
-'''Test locale independence of WKT
-'''
+"""Test locale independence of WKT
+"""
 from . import unittest
 import sys
 import locale
@@ -7,15 +7,12 @@ from shapely.wkt import loads, dumps
 
 # Set locale to one that uses a comma as decimal separator
 # TODO: try a few other common locales
-if sys.platform == 'win32':
-    test_locales = {
-        'Portuguese': 'portuguese_brazil',
-        'Italian': 'italian_italy'
-    }
+if sys.platform == "win32":
+    test_locales = {"Portuguese": "portuguese_brazil", "Italian": "italian_italy"}
 else:
     test_locales = {
-        'Portuguese': 'pt_BR.UTF-8',
-        'Italian': 'it_IT.UTF-8',
+        "Portuguese": "pt_BR.UTF-8",
+        "Italian": "it_IT.UTF-8",
     }
 
 do_test_locale = False
@@ -32,11 +29,11 @@ def setUpModule():
         except:
             pass
     if not do_test_locale:
-        raise unittest.SkipTest('test locale not found')
+        raise unittest.SkipTest("test locale not found")
 
 
 def tearDownModule():
-    if sys.platform == 'win32' or sys.version_info[0:2] >= (3, 11):
+    if sys.platform == "win32" or sys.version_info[0:2] >= (3, 11):
         locale.setlocale(locale.LC_ALL, "")
     else:
         # Deprecated since version 3.11, will be removed in version 3.13
@@ -44,15 +41,13 @@ def tearDownModule():
 
 
 class LocaleTestCase(unittest.TestCase):
-
     # @unittest.skipIf(not do_test_locale, 'test locale not found')
 
     def test_wkt_locale(self):
-
         # Test reading and writing
-        p = loads('POINT (0.0 0.0)')
+        p = loads("POINT (0.0 0.0)")
         assert p.x == 0.0
         assert p.y == 0.0
         wkt = dumps(p)
-        assert wkt.startswith('POINT')
-        assert ',' not in wkt
+        assert wkt.startswith("POINT")
+        assert "," not in wkt

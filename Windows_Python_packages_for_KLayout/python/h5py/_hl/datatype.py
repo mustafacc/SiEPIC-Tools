@@ -16,16 +16,17 @@ import posixpath as pp
 from ..h5t import TypeID
 from .base import HLObject, with_phil
 
+
 class Datatype(HLObject):
 
     """
-        Represents an HDF5 named datatype stored in a file.
+    Represents an HDF5 named datatype stored in a file.
 
-        To store a datatype, simply assign it to a name in a group:
+    To store a datatype, simply assign it to a name in a group:
 
-        >>> MyGroup["name"] = numpy.dtype("f")
-        >>> named_type = MyGroup["name"]
-        >>> assert named_type.dtype == numpy.dtype("f")
+    >>> MyGroup["name"] = numpy.dtype("f")
+    >>> named_type = MyGroup["name"]
+    >>> assert named_type.dtype == numpy.dtype("f")
     """
 
     @property
@@ -36,8 +37,7 @@ class Datatype(HLObject):
 
     @with_phil
     def __init__(self, bind):
-        """ Create a new Datatype object by binding to a low-level TypeID.
-        """
+        """Create a new Datatype object by binding to a low-level TypeID."""
         if not isinstance(bind, TypeID):
             raise ValueError("%s is not a TypeID" % bind)
         super().__init__(bind)
@@ -50,6 +50,5 @@ class Datatype(HLObject):
             namestr = '("anonymous")'
         else:
             name = pp.basename(pp.normpath(self.name))
-            namestr = '"%s"' % (name if name != '' else '/')
-        return '<HDF5 named type %s (dtype %s)>' % \
-            (namestr, self.dtype.str)
+            namestr = '"%s"' % (name if name != "" else "/")
+        return "<HDF5 named type %s (dtype %s)>" % (namestr, self.dtype.str)

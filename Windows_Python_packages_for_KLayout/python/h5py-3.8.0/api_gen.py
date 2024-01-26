@@ -1,4 +1,3 @@
-
 """
     Generate the lowest-level Cython bindings to HDF5.
 
@@ -31,36 +30,37 @@ import os.path as op
 class Line:
 
     """
-        Represents one line from the api_functions.txt file.
+    Represents one line from the api_functions.txt file.
 
-        Exists to provide the following attributes:
+    Exists to provide the following attributes:
 
-        nogil:      String indicating if we should release the GIL to call this
-                    function. Any Python callbacks it could trigger must
-                    acquire the GIL (e.g. using 'with gil' in Cython).
-        mpi:        Bool indicating if MPI required
-        ros3:       Bool indicating if ROS3 required
-        direct_vfd: Bool indicating if DIRECT_VFD required
-        version:    None or a minimum-version tuple
-        code:       String with function return type
-        fname:      String with function name
-        sig:        String with raw function signature
-        args:       String with sequence of arguments to call function
+    nogil:      String indicating if we should release the GIL to call this
+                function. Any Python callbacks it could trigger must
+                acquire the GIL (e.g. using 'with gil' in Cython).
+    mpi:        Bool indicating if MPI required
+    ros3:       Bool indicating if ROS3 required
+    direct_vfd: Bool indicating if DIRECT_VFD required
+    version:    None or a minimum-version tuple
+    code:       String with function return type
+    fname:      String with function name
+    sig:        String with raw function signature
+    args:       String with sequence of arguments to call function
 
-        Example:    MPI 1.8.12 int foo(char* a, size_t b)
+    Example:    MPI 1.8.12 int foo(char* a, size_t b)
 
-        .nogil:     ""
-        .mpi:       True
-        .ros3:      False
-        .direct_vfd: False
-        .version:   (1, 8, 12)
-        .code:      "int"
-        .fname:     "foo"
-        .sig:       "char* a, size_t b"
-        .args:      "a, b"
+    .nogil:     ""
+    .mpi:       True
+    .ros3:      False
+    .direct_vfd: False
+    .version:   (1, 8, 12)
+    .code:      "int"
+    .fname:     "foo"
+    .sig:       "char* a, size_t b"
+    .args:      "a, b"
     """
 
-    PATTERN = re.compile("""(?P<mpi>(MPI)[ ]+)?
+    PATTERN = re.compile(
+        """(?P<mpi>(MPI)[ ]+)?
                             (?P<ros3>(ROS3)[ ]+)?
                             (?P<direct_vfd>(DIRECT_VFD)[ ]+)?
                             (?P<min_version>([0-9]+\.[0-9]+\.[0-9]+))?
@@ -71,17 +71,22 @@ class Line:
                             \((?P<sig>[a-zA-Z0-9_,* ]*)\)
                             ([ ]+)?
                             (?P<nogil>(nogil))?
-                            """, re.VERBOSE)
+                            """,
+        re.VERBOSE,
+    )
 
-    SIG_PATTERN = re.compile("""
+    SIG_PATTERN = re.compile(
+        """
                              (?:unsigned[ ]+)?
                              (?:[a-zA-Z_]+[a-zA-Z0-9_]*\**)
                              [ ]+[ *]*
                              (?P<param>[a-zA-Z_]+[a-zA-Z0-9_]*)
-                             """, re.VERBOSE)
+                             """,
+        re.VERBOSE,
+    )
 
     def __init__(self, text):
-        """ Break the line into pieces and populate object attributes.
+        """Break the line into pieces and populate object attributes.
 
         text: A valid function line, with leading/trailing whitespace stripped.
         """
@@ -91,35 +96,41 @@ class Line:
             raise ValueError("Invalid line encountered: {0}".format(text))
 
         parts = m.groupdict()
-        self.nogil = "nogil" if parts['nogil'] else ""
-        self.mpi = parts['mpi'] is not None
-        self.ros3 = parts['ros3'] is not None
-        self.direct_vfd = parts['direct_vfd'] is not None
-        self.min_version = parts['min_version']
+        self.nogil = "nogil" if parts["nogil"] else ""
+        self.mpi = parts["mpi"] is not None
+        self.ros3 = parts["ros3"] is not None
+        self.direct_vfd = parts["direct_vfd"] is not None
+        self.min_version = parts["min_version"]
         if self.min_version is not None:
-            self.min_version = tuple(int(x) for x in self.min_version.split('.'))
-        self.max_version = parts['max_version']
+            self.min_version = tuple(int(x) for x in self.min_version.split("."))
+        self.max_version = parts["max_version"]
         if self.max_version is not None:
-            self.max_version = tuple(int(x) for x in self.max_version.split('.'))
-        self.code = parts['code']
-        self.fname = parts['fname']
-        self.sig = parts['sig']
+            self.max_version = tuple(int(x) for x in self.max_version.split("."))
+        self.code = parts["code"]
+        self.fname = parts["fname"]
+        self.sig = parts["sig"]
 
-        sig_const_stripped = self.sig.replace('const', '')
+        sig_const_stripped = self.sig.replace("const", "")
         self.args = self.SIG_PATTERN.findall(sig_const_stripped)
         if self.args is None:
             raise ValueError("Invalid function signature: {0}".format(self.sig))
         self.args = ", ".join(self.args)
 
         # Figure out what test and return value to use with error reporting
-        if '*' in self.code or self.code in ('H5T_conv_t',):
+        if "*" in self.code or self.code in ("H5T_conv_t",):
             self.err_condition = "==NULL"
             self.err_value = f"<{self.code}>NULL"
-        elif self.code in ('int', 'herr_t', 'htri_t', 'hid_t', 'hssize_t', 'ssize_t') \
-                or re.match(r'H5[A-Z]+_[a-zA-Z_]+_t', self.code):
+        elif self.code in (
+            "int",
+            "herr_t",
+            "htri_t",
+            "hid_t",
+            "hssize_t",
+            "ssize_t",
+        ) or re.match(r"H5[A-Z]+_[a-zA-Z_]+_t", self.code):
             self.err_condition = "<0"
             self.err_value = f"<{self.code}>-1"
-        elif self.code in ('unsigned int', 'haddr_t', 'hsize_t', 'size_t'):
+        elif self.code in ("unsigned int", "haddr_t", "hsize_t", "size_t"):
             self.err_condition = "==0"
             self.err_value = f"<{self.code}>0"
         else:
@@ -169,34 +180,34 @@ from ._errors cimport set_exception, set_default_error_handler
 
 
 class LineProcessor:
-
     def run(self):
-
         # Function definitions file
-        self.functions = open(op.join('h5py', 'api_functions.txt'), 'r')
+        self.functions = open(op.join("h5py", "api_functions.txt"), "r")
 
         # Create output files
-        self.raw_defs = open(op.join('h5py', '_hdf5.pxd'), 'w')
-        self.cython_defs = open(op.join('h5py', 'defs.pxd'), 'w')
-        self.cython_imp = open(op.join('h5py', 'defs.pyx'), 'w')
+        self.raw_defs = open(op.join("h5py", "_hdf5.pxd"), "w")
+        self.cython_defs = open(op.join("h5py", "defs.pxd"), "w")
+        self.cython_imp = open(op.join("h5py", "defs.pyx"), "w")
 
         self.raw_defs.write(raw_preamble)
         self.cython_defs.write(def_preamble)
         self.cython_imp.write(imp_preamble)
 
         for text in self.functions:
-
             # Directive specifying a header file
-            if not text.startswith(' ') and not text.startswith('#') and \
-            len(text.strip()) > 0:
-                inc = text.split(':')[0]
+            if (
+                not text.startswith(" ")
+                and not text.startswith("#")
+                and len(text.strip()) > 0
+            ):
+                inc = text.split(":")[0]
                 self.raw_defs.write('cdef extern from "%s.h":\n' % inc)
                 continue
 
             text = text.strip()
 
             # Whitespace or comment line
-            if len(text) == 0 or text[0] == '#':
+            if len(text) == 0 or text[0] == "#":
                 continue
 
             # Valid function line
@@ -211,50 +222,65 @@ class LineProcessor:
         self.raw_defs.close()
 
     def add_cython_if(self, block):
-        """ Wrap a block of code in the required "IF" checks """
+        """Wrap a block of code in the required "IF" checks"""
 
         def wrapif(condition, code):
-            code = code.replace('\n', '\n    ', code.count('\n') - 1)  # Yes, -1.
+            code = code.replace("\n", "\n    ", code.count("\n") - 1)  # Yes, -1.
             code = "IF {0}:\n    {1}".format(condition, code)
             return code
 
         if self.line.mpi:
-            block = wrapif('MPI', block)
+            block = wrapif("MPI", block)
 
         if self.line.ros3:
-            block = wrapif('ROS3', block)
+            block = wrapif("ROS3", block)
 
         if self.line.direct_vfd:
-            block = wrapif('DIRECT_VFD', block)
+            block = wrapif("DIRECT_VFD", block)
 
         if self.line.min_version is not None and self.line.max_version is not None:
-            block = wrapif('HDF5_VERSION >= {0.min_version} and HDF5_VERSION <= {0.max_version}'.format(self.line), block)
+            block = wrapif(
+                "HDF5_VERSION >= {0.min_version} and HDF5_VERSION <= {0.max_version}".format(
+                    self.line
+                ),
+                block,
+            )
         elif self.line.min_version is not None:
-            block = wrapif('HDF5_VERSION >= {0.min_version}'.format(self.line), block)
+            block = wrapif("HDF5_VERSION >= {0.min_version}".format(self.line), block)
         elif self.line.max_version is not None:
-            block = wrapif('HDF5_VERSION <= {0.max_version}'.format(self.line), block)
+            block = wrapif("HDF5_VERSION <= {0.max_version}".format(self.line), block)
 
         return block
 
     def write_raw_sig(self):
-        """ Write out "cdef extern"-style definition for an HDF5 function """
+        """Write out "cdef extern"-style definition for an HDF5 function"""
         raw_sig = "{0.code} {0.fname}({0.sig}) {0.nogil}\n".format(self.line)
         raw_sig = self.add_cython_if(raw_sig)
-        raw_sig = "\n".join(("    " + x if x.strip() else x) for x in raw_sig.split("\n"))
+        raw_sig = "\n".join(
+            ("    " + x if x.strip() else x) for x in raw_sig.split("\n")
+        )
         self.raw_defs.write(raw_sig)
 
     def write_cython_sig(self):
-        """ Write out Cython signature for wrapper function """
-        if self.line.fname == 'H5Dget_storage_size':
+        """Write out Cython signature for wrapper function"""
+        if self.line.fname == "H5Dget_storage_size":
             # Special case: https://github.com/h5py/h5py/issues/1475
-            cython_sig = "cdef {0.code} {0.fname}({0.sig}) except? {0.err_value}\n".format(self.line)
+            cython_sig = (
+                "cdef {0.code} {0.fname}({0.sig}) except? {0.err_value}\n".format(
+                    self.line
+                )
+            )
         else:
-            cython_sig = "cdef {0.code} {0.fname}({0.sig}) except {0.err_value}\n".format(self.line)
+            cython_sig = (
+                "cdef {0.code} {0.fname}({0.sig}) except {0.err_value}\n".format(
+                    self.line
+                )
+            )
         cython_sig = self.add_cython_if(cython_sig)
         self.cython_defs.write(cython_sig)
 
     def write_cython_imp(self):
-        """ Write out Cython wrapper implementation """
+        """Write out Cython wrapper implementation"""
         if self.line.nogil:
             imp = """\
 cdef {0.code} {0.fname}({0.sig}) except {0.err_value}:
@@ -271,7 +297,7 @@ cdef {0.code} {0.fname}({0.sig}) except {0.err_value}:
 
 """
         else:
-            if self.line.fname == 'H5Dget_storage_size':
+            if self.line.fname == "H5Dget_storage_size":
                 # Special case: https://github.com/h5py/h5py/issues/1475
                 imp = """\
 cdef {0.code} {0.fname}({0.sig}) except? {0.err_value}:
@@ -308,5 +334,5 @@ def run():
     lp.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

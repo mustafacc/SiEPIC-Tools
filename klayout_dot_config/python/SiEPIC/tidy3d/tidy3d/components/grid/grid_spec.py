@@ -170,7 +170,10 @@ class UniformGrid(GridSpec1d):
             1D coords to be used as grid boundaries.
         """
 
-        center, size = structures[0].geometry.center[axis], structures[0].geometry.size[axis]
+        center, size = (
+            structures[0].geometry.center[axis],
+            structures[0].geometry.size[axis],
+        )
 
         # Take a number of steps commensurate with the size; make dl a bit smaller if needed
         num_cells = int(np.ceil(size / self.dl))
@@ -227,7 +230,10 @@ class CustomGrid(GridSpec1d):
             1D coords to be used as grid boundaries.
         """
 
-        center, size = structures[0].geometry.center[axis], structures[0].geometry.size[axis]
+        center, size = (
+            structures[0].geometry.center[axis],
+            structures[0].geometry.size[axis],
+        )
 
         # get bounding coordinates
         dl = np.array(self.dl)
@@ -507,13 +513,17 @@ class GridSpec(Tidy3dBaseModel):
         wavelength = self.wavelength
         if wavelength is None and self.auto_grid_used:
             wavelength = self.wavelength_from_sources(sources)
-            log.info(f"Auto meshing using wavelength {wavelength:1.4f} defined from sources.")
+            log.info(
+                f"Auto meshing using wavelength {wavelength:1.4f} defined from sources."
+            )
 
         # Warn user if ``GridType`` along some axis is not ``AutoGrid`` and
         # ``override_structures`` is not empty. The override structures
         # are not effective along those axes.
         for axis_ind, override_used_axis, grid_axis in zip(
-            ["x", "y", "z"], self.override_structures_used, [self.grid_x, self.grid_y, self.grid_z]
+            ["x", "y", "z"],
+            self.override_structures_used,
+            [self.grid_x, self.grid_y, self.grid_z],
         ):
             if override_used_axis and not isinstance(grid_axis, AutoGrid):
                 log.warning(

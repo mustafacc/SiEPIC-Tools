@@ -32,19 +32,19 @@ if hdf5_version >= h5.get_config().swmr_min_hdf5_version:
     swmr_support = True
 
 
-libver_dict = {'earliest': h5f.LIBVER_EARLIEST, 'latest': h5f.LIBVER_LATEST}
+libver_dict = {"earliest": h5f.LIBVER_EARLIEST, "latest": h5f.LIBVER_LATEST}
 libver_dict_r = dict((y, x) for x, y in libver_dict.items())
 if hdf5_version >= (1, 10, 2):
-    libver_dict.update({'v108': h5f.LIBVER_V18, 'v110': h5f.LIBVER_V110})
-    libver_dict_r.update({h5f.LIBVER_V18: 'v108', h5f.LIBVER_V110: 'v110'})
+    libver_dict.update({"v108": h5f.LIBVER_V18, "v110": h5f.LIBVER_V110})
+    libver_dict_r.update({h5f.LIBVER_V18: "v108", h5f.LIBVER_V110: "v110"})
 
 if hdf5_version >= (1, 11, 4):
-    libver_dict.update({'v112': h5f.LIBVER_V112})
-    libver_dict_r.update({h5f.LIBVER_V112: 'v112'})
+    libver_dict.update({"v112": h5f.LIBVER_V112})
+    libver_dict_r.update({h5f.LIBVER_V112: "v112"})
 
 if hdf5_version >= (1, 13, 0):
-    libver_dict.update({'v114': h5f.LIBVER_V114})
-    libver_dict_r.update({h5f.LIBVER_V114: 'v114'})
+    libver_dict.update({"v114": h5f.LIBVER_V114})
+    libver_dict_r.update({h5f.LIBVER_V114: "v114"})
 
 
 def _set_fapl_mpio(plist, **kwargs):
@@ -53,33 +53,33 @@ def _set_fapl_mpio(plist, **kwargs):
         raise ValueError("h5py was built without MPI support, can't use mpio driver")
 
     import mpi4py.MPI
-    kwargs.setdefault('info', mpi4py.MPI.Info())
+
+    kwargs.setdefault("info", mpi4py.MPI.Info())
     plist.set_fapl_mpio(**kwargs)
 
 
 def _set_fapl_fileobj(plist, **kwargs):
     """Set the Python file object driver in a file access property list"""
-    plist.set_fileobj_driver(h5fd.fileobj_driver, kwargs.get('fileobj'))
+    plist.set_fileobj_driver(h5fd.fileobj_driver, kwargs.get("fileobj"))
 
 
 _drivers = {
-    'sec2': lambda plist, **kwargs: plist.set_fapl_sec2(**kwargs),
-    'stdio': lambda plist, **kwargs: plist.set_fapl_stdio(**kwargs),
-    'core': lambda plist, **kwargs: plist.set_fapl_core(**kwargs),
-    'family': lambda plist, **kwargs: plist.set_fapl_family(
-        memb_fapl=plist.copy(),
-        **kwargs
+    "sec2": lambda plist, **kwargs: plist.set_fapl_sec2(**kwargs),
+    "stdio": lambda plist, **kwargs: plist.set_fapl_stdio(**kwargs),
+    "core": lambda plist, **kwargs: plist.set_fapl_core(**kwargs),
+    "family": lambda plist, **kwargs: plist.set_fapl_family(
+        memb_fapl=plist.copy(), **kwargs
     ),
-    'mpio': _set_fapl_mpio,
-    'fileobj': _set_fapl_fileobj,
-    'split': lambda plist, **kwargs: plist.set_fapl_split(**kwargs),
+    "mpio": _set_fapl_mpio,
+    "fileobj": _set_fapl_fileobj,
+    "split": lambda plist, **kwargs: plist.set_fapl_split(**kwargs),
 }
 
 if ros3:
-    _drivers['ros3'] = lambda plist, **kwargs: plist.set_fapl_ros3(**kwargs)
+    _drivers["ros3"] = lambda plist, **kwargs: plist.set_fapl_ros3(**kwargs)
 
 if direct_vfd:
-    _drivers['direct'] = lambda plist, **kwargs: plist.set_fapl_direct(**kwargs)  # noqa
+    _drivers["direct"] = lambda plist, **kwargs: plist.set_fapl_direct(**kwargs)  # noqa
 
 
 def register_driver(name, set_fapl):
@@ -107,16 +107,26 @@ def unregister_driver(name):
 
 
 def registered_drivers():
-    """Return a frozenset of the names of all of the registered drivers.
-    """
+    """Return a frozenset of the names of all of the registered drivers."""
     return frozenset(_drivers)
 
 
-def make_fapl(driver, libver, rdcc_nslots, rdcc_nbytes, rdcc_w0, locking,
-              page_buf_size, min_meta_keep, min_raw_keep,
-              alignment_threshold, alignment_interval, meta_block_size,
-              **kwds):
-    """ Set up a file access property list """
+def make_fapl(
+    driver,
+    libver,
+    rdcc_nslots,
+    rdcc_nbytes,
+    rdcc_w0,
+    locking,
+    page_buf_size,
+    min_meta_keep,
+    min_raw_keep,
+    alignment_threshold,
+    alignment_interval,
+    meta_block_size,
+    **kwds,
+):
+    """Set up a file access property list"""
     plist = h5p.create(h5p.FILE_ACCESS)
 
     if libver is not None:
@@ -141,16 +151,20 @@ def make_fapl(driver, libver, rdcc_nslots, rdcc_nbytes, rdcc_w0, locking,
     plist.set_cache(*cache_settings)
 
     if page_buf_size:
-        plist.set_page_buffer_size(int(page_buf_size), int(min_meta_keep),
-                                   int(min_raw_keep))
+        plist.set_page_buffer_size(
+            int(page_buf_size), int(min_meta_keep), int(min_raw_keep)
+        )
 
     if meta_block_size is not None:
         plist.set_meta_block_size(int(meta_block_size))
 
     if locking is not None:
-        if hdf5_version < (1, 12, 1) and (hdf5_version[:2] != (1, 10) or hdf5_version[2] < 7):
+        if hdf5_version < (1, 12, 1) and (
+            hdf5_version[:2] != (1, 10) or hdf5_version[2] < 7
+        ):
             raise ValueError(
-                "HDF5 version >= 1.12.1 or 1.10.x >= 1.10.7 required for file locking.")
+                "HDF5 version >= 1.12.1 or 1.10.x >= 1.10.7 required for file locking."
+            )
 
         if locking in ("false", False):
             plist.set_file_locking(False, ignore_when_disabled=False)
@@ -161,11 +175,12 @@ def make_fapl(driver, libver, rdcc_nslots, rdcc_nbytes, rdcc_w0, locking,
         else:
             raise ValueError(f"Unsupported locking value: {locking}")
 
-    if driver is None or (driver == 'windows' and sys.platform == 'win32'):
+    if driver is None or (driver == "windows" and sys.platform == "win32"):
         # Prevent swallowing unused key arguments
         if kwds:
-            msg = "'{key}' is an invalid keyword argument for this function" \
-                  .format(key=next(iter(kwds)))
+            msg = "'{key}' is an invalid keyword argument for this function".format(
+                key=next(iter(kwds))
+            )
             raise TypeError(msg)
         return plist
 
@@ -179,29 +194,32 @@ def make_fapl(driver, libver, rdcc_nslots, rdcc_nbytes, rdcc_w0, locking,
     return plist
 
 
-def make_fcpl(track_order=False, fs_strategy=None, fs_persist=False,
-              fs_threshold=1, fs_page_size=None):
-    """ Set up a file creation property list """
+def make_fcpl(
+    track_order=False,
+    fs_strategy=None,
+    fs_persist=False,
+    fs_threshold=1,
+    fs_page_size=None,
+):
+    """Set up a file creation property list"""
     if track_order or fs_strategy:
         plist = h5p.create(h5p.FILE_CREATE)
         if track_order:
-            plist.set_link_creation_order(
-                h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
-            plist.set_attr_creation_order(
-                h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
+            plist.set_link_creation_order(h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
+            plist.set_attr_creation_order(h5p.CRT_ORDER_TRACKED | h5p.CRT_ORDER_INDEXED)
         if fs_strategy:
             strategies = {
-                'fsm': h5f.FSPACE_STRATEGY_FSM_AGGR,
-                'page': h5f.FSPACE_STRATEGY_PAGE,
-                'aggregate': h5f.FSPACE_STRATEGY_AGGR,
-                'none': h5f.FSPACE_STRATEGY_NONE
+                "fsm": h5f.FSPACE_STRATEGY_FSM_AGGR,
+                "page": h5f.FSPACE_STRATEGY_PAGE,
+                "aggregate": h5f.FSPACE_STRATEGY_AGGR,
+                "none": h5f.FSPACE_STRATEGY_NONE,
             }
             fs_strat_num = strategies.get(fs_strategy, -1)
             if fs_strat_num == -1:
                 raise ValueError("Invalid file space strategy type")
 
             plist.set_file_space_strategy(fs_strat_num, fs_persist, fs_threshold)
-            if fs_page_size and fs_strategy == 'page':
+            if fs_page_size and fs_strategy == "page":
                 plist.set_file_space_page_size(int(fs_page_size))
     else:
         plist = None
@@ -209,13 +227,12 @@ def make_fcpl(track_order=False, fs_strategy=None, fs_persist=False,
 
 
 def make_fid(name, mode, userblock_size, fapl, fcpl=None, swmr=False):
-    """ Get a new FileID by opening or creating a file.
+    """Get a new FileID by opening or creating a file.
     Also validates mode argument."""
 
     if userblock_size is not None:
-        if mode in ('r', 'r+'):
-            raise ValueError("User block may only be specified "
-                             "when creating a file")
+        if mode in ("r", "r+"):
+            raise ValueError("User block may only be specified " "when creating a file")
         try:
             userblock_size = int(userblock_size)
         except (TypeError, ValueError):
@@ -224,36 +241,41 @@ def make_fid(name, mode, userblock_size, fapl, fcpl=None, swmr=False):
             fcpl = h5p.create(h5p.FILE_CREATE)
         fcpl.set_userblock(userblock_size)
 
-    if mode == 'r':
+    if mode == "r":
         flags = h5f.ACC_RDONLY
         if swmr and swmr_support:
             flags |= h5f.ACC_SWMR_READ
         fid = h5f.open(name, flags, fapl=fapl)
-    elif mode == 'r+':
+    elif mode == "r+":
         fid = h5f.open(name, h5f.ACC_RDWR, fapl=fapl)
-    elif mode in ['w-', 'x']:
+    elif mode in ["w-", "x"]:
         fid = h5f.create(name, h5f.ACC_EXCL, fapl=fapl, fcpl=fcpl)
-    elif mode == 'w':
+    elif mode == "w":
         fid = h5f.create(name, h5f.ACC_TRUNC, fapl=fapl, fcpl=fcpl)
-    elif mode == 'a':
+    elif mode == "a":
         # Open in append mode (read/write).
         # If that fails, create a new file only if it won't clobber an
         # existing one (ACC_EXCL)
         try:
             fid = h5f.open(name, h5f.ACC_RDWR, fapl=fapl)
         # Not all drivers raise FileNotFoundError (commented those that do not)
-        except FileNotFoundError if fapl.get_driver() in (
-            h5fd.SEC2,
-            h5fd.DIRECT if direct_vfd else -1,
-            # h5fd.STDIO,
-            # h5fd.CORE,
-            h5fd.FAMILY,
-            h5fd.WINDOWS,
-            # h5fd.MPIO,
-            # h5fd.MPIPOSIX,
-            h5fd.fileobj_driver,
-            h5fd.ROS3D if ros3 else -1,
-        ) else OSError:
+        except (
+            FileNotFoundError
+            if fapl.get_driver()
+            in (
+                h5fd.SEC2,
+                h5fd.DIRECT if direct_vfd else -1,
+                # h5fd.STDIO,
+                # h5fd.CORE,
+                h5fd.FAMILY,
+                h5fd.WINDOWS,
+                # h5fd.MPIO,
+                # h5fd.MPIPOSIX,
+                h5fd.fileobj_driver,
+                h5fd.ROS3D if ros3 else -1,
+            )
+            else OSError
+        ):
             fid = h5f.create(name, h5f.ACC_EXCL, fapl=fapl, fcpl=fcpl)
     else:
         raise ValueError("Invalid mode; must be one of r, r+, w, w-, x, a")
@@ -262,7 +284,10 @@ def make_fid(name, mode, userblock_size, fapl, fcpl=None, swmr=False):
         if userblock_size is not None:
             existing_fcpl = fid.get_create_plist()
             if existing_fcpl.get_userblock() != userblock_size:
-                raise ValueError("Requested userblock size (%d) does not match that of existing file (%d)" % (userblock_size, existing_fcpl.get_userblock()))
+                raise ValueError(
+                    "Requested userblock size (%d) does not match that of existing file (%d)"
+                    % (userblock_size, existing_fcpl.get_userblock())
+                )
     except Exception as e:
         fid.close()
         raise e
@@ -273,17 +298,18 @@ def make_fid(name, mode, userblock_size, fapl, fcpl=None, swmr=False):
 class File(Group):
 
     """
-        Represents an HDF5 file.
+    Represents an HDF5 file.
     """
 
     @property
     def attrs(self):
-        """ Attributes attached to this object """
+        """Attributes attached to this object"""
         # hdf5 complains that a file identifier is an invalid location for an
         # attribute. Instead of self, pass the root group to AttributeManager:
         from . import attrs
+
         with phil:
-            return attrs.AttributeManager(self['/'])
+            return attrs.AttributeManager(self["/"])
 
     @property
     @with_phil
@@ -295,28 +321,30 @@ class File(Group):
     @with_phil
     def driver(self):
         """Low-level HDF5 file driver used to open file"""
-        drivers = {h5fd.SEC2: 'sec2',
-                   h5fd.STDIO: 'stdio',
-                   h5fd.CORE: 'core',
-                   h5fd.FAMILY: 'family',
-                   h5fd.WINDOWS: 'windows',
-                   h5fd.MPIO: 'mpio',
-                   h5fd.MPIPOSIX: 'mpiposix',
-                   h5fd.fileobj_driver: 'fileobj'}
+        drivers = {
+            h5fd.SEC2: "sec2",
+            h5fd.STDIO: "stdio",
+            h5fd.CORE: "core",
+            h5fd.FAMILY: "family",
+            h5fd.WINDOWS: "windows",
+            h5fd.MPIO: "mpio",
+            h5fd.MPIPOSIX: "mpiposix",
+            h5fd.fileobj_driver: "fileobj",
+        }
         if ros3:
-            drivers[h5fd.ROS3D] = 'ros3'
+            drivers[h5fd.ROS3D] = "ros3"
         if direct_vfd:
-            drivers[h5fd.DIRECT] = 'direct'
-        return drivers.get(self.id.get_access_plist().get_driver(), 'unknown')
+            drivers[h5fd.DIRECT] = "direct"
+        return drivers.get(self.id.get_access_plist().get_driver(), "unknown")
 
     @property
     @with_phil
     def mode(self):
-        """ Python mode used to open file """
+        """Python mode used to open file"""
         write_intent = h5f.ACC_RDWR
         if swmr_support:
             write_intent |= h5f.ACC_SWMR_WRITE
-        return 'r+' if self.id.get_intent() & write_intent else 'r'
+        return "r+" if self.id.get_intent() & write_intent else "r"
 
     @property
     @with_phil
@@ -328,14 +356,14 @@ class File(Group):
     @property
     @with_phil
     def userblock_size(self):
-        """ User block size (in bytes) """
+        """User block size (in bytes)"""
         fcpl = self.id.get_create_plist()
         return fcpl.get_userblock()
 
     @property
     @with_phil
     def meta_block_size(self):
-        """ Meta block size (in bytes) """
+        """Meta block size (in bytes)"""
         fapl = self.id.get_access_plist()
         return fapl.get_meta_block_size()
 
@@ -344,8 +372,7 @@ class File(Group):
         @property
         @with_phil
         def atomic(self):
-            """ Set/get MPI-IO atomic mode
-            """
+            """Set/get MPI-IO atomic mode"""
             return self.id.get_mpi_atomicity()
 
         @atomic.setter
@@ -357,8 +384,10 @@ class File(Group):
     @property
     @with_phil
     def swmr_mode(self):
-        """ Controls single-writer multiple-reader mode """
-        return swmr_support and bool(self.id.get_intent() & (h5f.ACC_SWMR_READ | h5f.ACC_SWMR_WRITE))
+        """Controls single-writer multiple-reader mode"""
+        return swmr_support and bool(
+            self.id.get_intent() & (h5f.ACC_SWMR_READ | h5f.ACC_SWMR_WRITE)
+        )
 
     @swmr_mode.setter
     @with_phil
@@ -370,13 +399,37 @@ class File(Group):
             else:
                 raise ValueError("It is not possible to forcibly switch SWMR mode off.")
         else:
-            raise RuntimeError('SWMR support is not available in HDF5 version {}.{}.{}.'.format(*hdf5_version))
+            raise RuntimeError(
+                "SWMR support is not available in HDF5 version {}.{}.{}.".format(
+                    *hdf5_version
+                )
+            )
 
-    def __init__(self, name, mode='r', driver=None, libver=None, userblock_size=None, swmr=False,
-                 rdcc_nslots=None, rdcc_nbytes=None, rdcc_w0=None, track_order=None,
-                 fs_strategy=None, fs_persist=False, fs_threshold=1, fs_page_size=None,
-                 page_buf_size=None, min_meta_keep=0, min_raw_keep=0, locking=None,
-                 alignment_threshold=1, alignment_interval=1, meta_block_size=None, **kwds):
+    def __init__(
+        self,
+        name,
+        mode="r",
+        driver=None,
+        libver=None,
+        userblock_size=None,
+        swmr=False,
+        rdcc_nslots=None,
+        rdcc_nbytes=None,
+        rdcc_w0=None,
+        track_order=None,
+        fs_strategy=None,
+        fs_persist=False,
+        fs_threshold=1,
+        fs_page_size=None,
+        page_buf_size=None,
+        min_meta_keep=0,
+        min_raw_keep=0,
+        locking=None,
+        alignment_threshold=1,
+        alignment_interval=1,
+        meta_block_size=None,
+        **kwds,
+    ):
         """Create a new file object.
 
         See the h5py user guide for a detailed explanation of the options.
@@ -497,57 +550,80 @@ class File(Group):
             Passed on to the selected file driver.
         """
         if (fs_strategy or page_buf_size) and hdf5_version < (1, 10, 1):
-            raise ValueError("HDF5 version 1.10.1 or greater required for file space strategy or page buffering support.")
+            raise ValueError(
+                "HDF5 version 1.10.1 or greater required for file space strategy or page buffering support."
+            )
 
         if swmr and not swmr_support:
-            raise ValueError("The SWMR feature is not available in this version of the HDF5 library")
+            raise ValueError(
+                "The SWMR feature is not available in this version of the HDF5 library"
+            )
 
-        if driver == 'ros3':
+        if driver == "ros3":
             if ros3:
                 from urllib.parse import urlparse
+
                 url = urlparse(name)
-                if url.scheme == 's3':
-                    aws_region = kwds.get('aws_region', b'').decode('ascii')
+                if url.scheme == "s3":
+                    aws_region = kwds.get("aws_region", b"").decode("ascii")
                     if len(aws_region) == 0:
-                        raise ValueError('AWS region required for s3:// location')
-                    name = f'https://s3.{aws_region}.amazonaws.com/{url.netloc}{url.path}'
-                elif url.scheme not in ('https', 'http'):
-                    raise ValueError(f'{name}: S3 location must begin with '
-                                     'either "https://", "http://", or "s3://"')
+                        raise ValueError("AWS region required for s3:// location")
+                    name = (
+                        f"https://s3.{aws_region}.amazonaws.com/{url.netloc}{url.path}"
+                    )
+                elif url.scheme not in ("https", "http"):
+                    raise ValueError(
+                        f"{name}: S3 location must begin with "
+                        'either "https://", "http://", or "s3://"'
+                    )
             else:
                 raise ValueError(
-                    "h5py was built without ROS3 support, can't use ros3 driver")
+                    "h5py was built without ROS3 support, can't use ros3 driver"
+                )
 
-        if locking is not None and hdf5_version < (1, 12, 1) and (
-                hdf5_version[:2] != (1, 10) or hdf5_version[2] < 7):
-            raise ValueError("HDF5 version >= 1.12.1 or 1.10.x >= 1.10.7 required for file locking options.")
+        if (
+            locking is not None
+            and hdf5_version < (1, 12, 1)
+            and (hdf5_version[:2] != (1, 10) or hdf5_version[2] < 7)
+        ):
+            raise ValueError(
+                "HDF5 version >= 1.12.1 or 1.10.x >= 1.10.7 required for file locking options."
+            )
 
         if isinstance(name, _objects.ObjectID):
             if fs_strategy:
-                raise ValueError("Unable to set file space strategy of an existing file")
+                raise ValueError(
+                    "Unable to set file space strategy of an existing file"
+                )
 
             with phil:
                 fid = h5i.get_file_id(name)
         else:
-            if hasattr(name, 'read') and hasattr(name, 'seek'):
-                if driver not in (None, 'fileobj'):
-                    raise ValueError("Driver must be 'fileobj' for file-like object if specified.")
-                driver = 'fileobj'
-                if kwds.get('fileobj', name) != name:
-                    raise ValueError("Invalid value of 'fileobj' argument; "
-                                     "must equal to file-like object if specified.")
+            if hasattr(name, "read") and hasattr(name, "seek"):
+                if driver not in (None, "fileobj"):
+                    raise ValueError(
+                        "Driver must be 'fileobj' for file-like object if specified."
+                    )
+                driver = "fileobj"
+                if kwds.get("fileobj", name) != name:
+                    raise ValueError(
+                        "Invalid value of 'fileobj' argument; "
+                        "must equal to file-like object if specified."
+                    )
                 kwds.update(fileobj=name)
-                name = repr(name).encode('ASCII', 'replace')
+                name = repr(name).encode("ASCII", "replace")
             else:
                 name = filename_encode(name)
 
             if track_order is None:
                 track_order = h5.get_config().track_order
 
-            if fs_strategy and mode not in ('w', 'w-', 'x'):
-                raise ValueError("Unable to set file space strategy of an existing file")
+            if fs_strategy and mode not in ("w", "w-", "x"):
+                raise ValueError(
+                    "Unable to set file space strategy of an existing file"
+                )
 
-            if swmr and mode != 'r':
+            if swmr and mode != "r":
                 warn(
                     "swmr=True only affects read ('r') mode. For swmr write "
                     "mode, set f.swmr_mode = True after opening the file.",
@@ -555,26 +631,39 @@ class File(Group):
                 )
 
             with phil:
-                fapl = make_fapl(driver, libver, rdcc_nslots, rdcc_nbytes, rdcc_w0,
-                                 locking, page_buf_size, min_meta_keep, min_raw_keep,
-                                 alignment_threshold=alignment_threshold,
-                                 alignment_interval=alignment_interval,
-                                 meta_block_size=meta_block_size,
-                                 **kwds)
-                fcpl = make_fcpl(track_order=track_order, fs_strategy=fs_strategy,
-                                 fs_persist=fs_persist, fs_threshold=fs_threshold,
-                                 fs_page_size=fs_page_size)
+                fapl = make_fapl(
+                    driver,
+                    libver,
+                    rdcc_nslots,
+                    rdcc_nbytes,
+                    rdcc_w0,
+                    locking,
+                    page_buf_size,
+                    min_meta_keep,
+                    min_raw_keep,
+                    alignment_threshold=alignment_threshold,
+                    alignment_interval=alignment_interval,
+                    meta_block_size=meta_block_size,
+                    **kwds,
+                )
+                fcpl = make_fcpl(
+                    track_order=track_order,
+                    fs_strategy=fs_strategy,
+                    fs_persist=fs_persist,
+                    fs_threshold=fs_threshold,
+                    fs_page_size=fs_page_size,
+                )
                 fid = make_fid(name, mode, userblock_size, fapl, fcpl, swmr=swmr)
 
             if isinstance(libver, tuple):
                 self._libver = libver
             else:
-                self._libver = (libver, 'latest')
+                self._libver = (libver, "latest")
 
         super().__init__(fid)
 
     def close(self):
-        """ Close the file.  All open objects become invalid """
+        """Close the file.  All open objects become invalid"""
         with phil:
             # Check that the file is still open, otherwise skip
             if self.id.valid:
@@ -589,8 +678,7 @@ class File(Group):
                 _objects.nonlocal_close()
 
     def flush(self):
-        """ Tell the HDF5 library to flush its buffers.
-        """
+        """Tell the HDF5 library to flush its buffers."""
         with phil:
             h5f.flush(self.id)
 
@@ -606,13 +694,13 @@ class File(Group):
     @with_phil
     def __repr__(self):
         if not self.id:
-            r = '<Closed HDF5 file>'
+            r = "<Closed HDF5 file>"
         else:
             # Filename has to be forced to Unicode if it comes back bytes
             # Mode is always a "native" string
             filename = self.filename
             if isinstance(filename, bytes):  # Can't decode fname
-                filename = filename.decode('utf8', 'replace')
+                filename = filename.decode("utf8", "replace")
             r = f'<HDF5 file "{os.path.basename(filename)}" (mode {self.mode})>'
 
         return r

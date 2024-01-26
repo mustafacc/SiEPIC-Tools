@@ -1,4 +1,3 @@
-
 """
     Demonstrate the use of h5py in SWMR mode to monitor the growth of a dataset
     on notification of file modifications.
@@ -23,14 +22,14 @@ import sys
 import h5py
 import logging
 
-#assert h5py.version.hdf5_version_tuple >= (1,9,178), "SWMR requires HDF5 version >= 1.9.178"
+# assert h5py.version.hdf5_version_tuple >= (1,9,178), "SWMR requires HDF5 version >= 1.9.178"
+
 
 class EventHandler(pyinotify.ProcessEvent):
-
     def monitor_dataset(self, filename, datasetname):
         logging.info("Opening file %s", filename)
-        self.f = h5py.File(filename, 'r', libver='latest', swmr=True)
-        logging.debug("Looking up dataset %s"%datasetname)
+        self.f = h5py.File(filename, "r", libver="latest", swmr=True)
+        logging.debug("Looking up dataset %s" % datasetname)
         self.dset = self.f[datasetname]
 
         self.get_dset_shape()
@@ -41,11 +40,11 @@ class EventHandler(pyinotify.ProcessEvent):
 
         logging.debug("Getting shape")
         shape = self.dset.shape
-        logging.info("Read data shape: %s"%str(shape))
+        logging.info("Read data shape: %s" % str(shape))
         return shape
 
     def read_dataset(self, latest):
-        logging.info("Reading out dataset [%d]"%latest)
+        logging.info("Reading out dataset [%d]" % latest)
         self.dset[latest:]
 
     def process_IN_MODIFY(self, event):
@@ -61,7 +60,9 @@ class EventHandler(pyinotify.ProcessEvent):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s  %(levelname)s\t%(message)s',level=logging.INFO)
+    logging.basicConfig(
+        format="%(asctime)s  %(levelname)s\t%(message)s", level=logging.INFO
+    )
 
     file_name = "swmr.h5"
     if len(sys.argv) > 1:
@@ -70,11 +71,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         dataset_name = sys.argv[2]
 
-
     wm = pyinotify.WatchManager()  # Watch Manager
     mask = pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE
     evh = EventHandler()
-    evh.monitor_dataset( file_name, dataset_name )
+    evh.monitor_dataset(file_name, dataset_name)
 
     notifier = pyinotify.AsyncNotifier(wm, evh)
     wdd = wm.add_watch(file_name, mask, rec=False)

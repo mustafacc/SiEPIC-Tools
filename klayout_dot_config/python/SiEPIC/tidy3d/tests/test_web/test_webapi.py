@@ -126,7 +126,9 @@ def mock_response(monkeypatch):
             return get_response(url)
 
     monkeypatch.setattr(
-        httputils, "get_headers", lambda: {"Authorization": None, "Application": "TIDY3D"}
+        httputils,
+        "get_headers",
+        lambda: {"Authorization": None, "Application": "TIDY3D"},
     )
     monkeypatch.setattr(webapi, "upload_string", lambda *args, **kwargs: None)
     monkeypatch.setattr(httputils, "session", MockRequests())
@@ -134,7 +136,9 @@ def mock_response(monkeypatch):
 
 def make_sim():
     """Makes a simulation."""
-    return td.Simulation(size=(1, 1, 1), grid_spec=td.GridSpec.auto(wavelength=1.0), run_time=1e-12)
+    return td.Simulation(
+        size=(1, 1, 1), grid_spec=td.GridSpec.auto(wavelength=1.0), run_time=1e-12
+    )
 
 
 def test_get_info(mock_response):

@@ -10,9 +10,10 @@ Created on Fri Mar  3 23:19:50 2023
 
 
 from SiEPIC.simulation.contraDC.klayout_gui import cdc_gui
+
 cdc_gui()
 
-'''
+"""
 from SiEPIC.simulation.contraDC_gui import cdc_gui, MyWindow
 #from . gui import MyWindow
         
@@ -27,5 +28,4 @@ mw.show()
 #app.exec_()
 
 
-'''
-
+"""

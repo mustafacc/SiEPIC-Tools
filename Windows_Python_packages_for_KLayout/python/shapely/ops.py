@@ -264,7 +264,6 @@ def transform(func, geom):
     if geom.is_empty:
         return geom
     if geom.geom_type in ("Point", "LineString", "LinearRing", "Polygon"):
-
         # First we try to apply func to x, y, z sequences. When func is
         # optimized for sequences, this is the fastest, though zipping
         # the results up to go back into the geometry constructors adds

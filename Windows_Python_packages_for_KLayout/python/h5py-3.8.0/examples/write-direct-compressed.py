@@ -8,8 +8,12 @@ f = h5py.File("direct_chunk.h5", "w")
 
 block_size = 2048
 dataset = f.create_dataset(
-    "data", (256, 1024, 1024), dtype="uint16", chunks=(64, 128, 128),
-    compression="gzip", compression_opts=4,
+    "data",
+    (256, 1024, 1024),
+    dtype="uint16",
+    chunks=(64, 128, 128),
+    compression="gzip",
+    compression_opts=4,
 )
 # h5py's compression='gzip' is actually a misnomer: gzip does the same
 # compression, but adds some extra metadata before & after the compressed data.

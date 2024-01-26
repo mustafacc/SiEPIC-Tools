@@ -11,9 +11,7 @@
     Implements operations common to all high-level objects (File, etc.).
 """
 
-from collections.abc import (
-    Mapping, MutableMapping, KeysView, ValuesView, ItemsView
-)
+from collections.abc import Mapping, MutableMapping, KeysView, ValuesView, ItemsView
 import os
 import posixpath
 
@@ -29,7 +27,7 @@ from .compat import fspath, filename_encode
 
 
 def is_hdf5(fname):
-    """ Determine if a file is valid HDF5 (False if it doesn't exist). """
+    """Determine if a file is valid HDF5 (False if it doesn't exist)."""
     with phil:
         fname = os.path.abspath(fspath(fname))
 
@@ -53,7 +51,7 @@ def find_item_type(data):
     """
     if isinstance(data, np.ndarray):
         if (
-            data.dtype.kind == 'O'
+            data.dtype.kind == "O"
             and not h5t.check_string_dtype(data.dtype)
             and not h5t.check_vlen_dtype(data.dtype)
         ):
@@ -71,7 +69,7 @@ def find_item_type(data):
 
 
 def guess_dtype(data):
-    """ Attempt to guess an appropriate dtype for the object, returning None
+    """Attempt to guess an appropriate dtype for the object, returning None
     if nothing is appropriate (or if it should be left up the the array
     constructor to figure out)
     """
@@ -84,7 +82,7 @@ def guess_dtype(data):
         item_type = find_item_type(data)
 
         if item_type is bytes:
-            return h5t.string_dtype(encoding='ascii')
+            return h5t.string_dtype(encoding="ascii")
         if item_type is str:
             return h5t.string_dtype()
 
@@ -96,7 +94,7 @@ def is_float16_dtype(dt):
         return False
 
     dt = np.dtype(dt)  # normalize strings -> np.dtype objects
-    return dt.kind == 'f' and dt.itemsize == 2
+    return dt.kind == "f" and dt.itemsize == 2
 
 
 def array_for_new_object(data, specified_dtype=None):
@@ -127,7 +125,7 @@ def array_for_new_object(data, specified_dtype=None):
 
 
 def default_lapl():
-    """ Default link access property list """
+    """Default link access property list"""
     lapl = h5p.create(h5p.LINK_ACCESS)
     fapl = h5p.create(h5p.FILE_ACCESS)
     fapl.set_fclose_degree(h5f.CLOSE_STRONG)
@@ -136,17 +134,18 @@ def default_lapl():
 
 
 def default_lcpl():
-    """ Default link creation property list """
+    """Default link creation property list"""
     lcpl = h5p.create(h5p.LINK_CREATE)
     lcpl.set_create_intermediate_group(True)
     return lcpl
+
 
 dlapl = default_lapl()
 dlcpl = default_lcpl()
 
 
 def is_empty_dataspace(obj):
-    """ Check if an object's dataspace is empty """
+    """Check if an object's dataspace is empty"""
     if obj.get_space().get_simple_extent_type() == h5s.NULL:
         return True
     return False
@@ -155,27 +154,25 @@ def is_empty_dataspace(obj):
 class CommonStateObject:
 
     """
-        Mixin class that allows sharing information between objects which
-        reside in the same HDF5 file.  Requires that the host class have
-        a ".id" attribute which returns a low-level ObjectID subclass.
+    Mixin class that allows sharing information between objects which
+    reside in the same HDF5 file.  Requires that the host class have
+    a ".id" attribute which returns a low-level ObjectID subclass.
 
-        Also implements Unicode operations.
+    Also implements Unicode operations.
     """
 
     @property
     def _lapl(self):
-        """ Fetch the link access property list appropriate for this object
-        """
+        """Fetch the link access property list appropriate for this object"""
         return dlapl
 
     @property
     def _lcpl(self):
-        """ Fetch the link creation property list appropriate for this object
-        """
+        """Fetch the link creation property list appropriate for this object"""
         return dlcpl
 
     def _e(self, name, lcpl=None):
-        """ Encode a name according to the current file settings.
+        """Encode a name according to the current file settings.
 
         Returns name, or 2-tuple (name, lcpl) if lcpl is True
 
@@ -184,8 +181,9 @@ class CommonStateObject:
 
         If name is None, returns either None or (None, None) appropriately.
         """
+
         def get_lcpl(coding):
-            """ Create an appropriate link creation property list """
+            """Create an appropriate link creation property list"""
             lcpl = self._lcpl.copy()
             lcpl.set_char_encoding(coding)
             return lcpl
@@ -197,10 +195,10 @@ class CommonStateObject:
             coding = h5t.CSET_ASCII
         else:
             try:
-                name = name.encode('ascii')
+                name = name.encode("ascii")
                 coding = h5t.CSET_ASCII
             except UnicodeEncodeError:
-                name = name.encode('utf8')
+                name = name.encode("utf8")
                 coding = h5t.CSET_UTF8
 
         if lcpl:
@@ -208,7 +206,7 @@ class CommonStateObject:
         return name
 
     def _d(self, name):
-        """ Decode a name according to the current file settings.
+        """Decode a name according to the current file settings.
 
         - Try to decode utf8
         - Failing that, return the byte string
@@ -219,7 +217,7 @@ class CommonStateObject:
             return None
 
         try:
-            return name.decode('utf8')
+            return name.decode("utf8")
         except UnicodeDecodeError:
             pass
         return name
@@ -228,20 +226,20 @@ class CommonStateObject:
 class _RegionProxy:
 
     """
-        Proxy object which handles region references.
+    Proxy object which handles region references.
 
-        To create a new region reference (datasets only), use slicing syntax:
+    To create a new region reference (datasets only), use slicing syntax:
 
-            >>> newref = obj.regionref[0:10:2]
+        >>> newref = obj.regionref[0:10:2]
 
-        To determine the target dataset shape from an existing reference:
+    To determine the target dataset shape from an existing reference:
 
-            >>> shape = obj.regionref.shape(existingref)
+        >>> shape = obj.regionref.shape(existingref)
 
-        where <obj> may be any object in the file. To determine the shape of
-        the selection in use on the target dataset:
+    where <obj> may be any object in the file. To determine the shape of
+    the selection in use on the target dataset:
 
-            >>> selection_shape = obj.regionref.selection(existingref)
+        >>> selection_shape = obj.regionref.selection(existingref)
     """
 
     def __init__(self, obj):
@@ -252,20 +250,21 @@ class _RegionProxy:
         if not isinstance(self.id, h5d.DatasetID):
             raise TypeError("Region references can only be made to datasets")
         from . import selections
+
         with phil:
             selection = selections.select(self.id.shape, args, dataset=self.obj)
-            return h5r.create(self.id, b'.', h5r.DATASET_REGION, selection.id)
+            return h5r.create(self.id, b".", h5r.DATASET_REGION, selection.id)
 
     def shape(self, ref):
-        """ Get the shape of the target dataspace referred to by *ref*. """
+        """Get the shape of the target dataspace referred to by *ref*."""
         with phil:
             sid = h5r.get_region(ref, self.id)
             return sid.shape
 
     def selection(self, ref):
-        """ Get the shape of the target dataspace selection referred to by *ref*
-        """
+        """Get the shape of the target dataspace selection referred to by *ref*"""
         from . import selections
+
         with phil:
             sid = h5r.get_region(ref, self.id)
             return selections.guess_shape(sid)
@@ -274,20 +273,21 @@ class _RegionProxy:
 class HLObject(CommonStateObject):
 
     """
-        Base class for high-level interface objects.
+    Base class for high-level interface objects.
     """
 
     @property
     def file(self):
-        """ Return a File instance associated with this object """
+        """Return a File instance associated with this object"""
         from . import files
+
         with phil:
             return files.File(self.id)
 
     @property
     @with_phil
     def name(self):
-        """ Return the full name of this object.  None if anonymous. """
+        """Return the full name of this object.  None if anonymous."""
         return self._d(h5i.get_name(self.id))
 
     @property
@@ -305,14 +305,14 @@ class HLObject(CommonStateObject):
     @property
     @with_phil
     def id(self):
-        """ Low-level identifier appropriate for this object """
+        """Low-level identifier appropriate for this object"""
         return self._id
 
     @property
     @with_phil
     def ref(self):
-        """ An (opaque) HDF5 reference to this object """
-        return h5r.create(self.id, b'.', h5r.OBJECT)
+        """An (opaque) HDF5 reference to this object"""
+        return h5r.create(self.id, b".", h5r.OBJECT)
 
     @property
     @with_phil
@@ -330,14 +330,15 @@ class HLObject(CommonStateObject):
 
     @property
     def attrs(self):
-        """ Attributes attached to this object """
+        """Attributes attached to this object"""
         from . import attrs
+
         with phil:
             return attrs.AttributeManager(self)
 
     @with_phil
     def __init__(self, oid):
-        """ Setup this object, given its low-level identifier """
+        """Setup this object, given its low-level identifier"""
         self._id = oid
 
     @with_phil
@@ -346,13 +347,14 @@ class HLObject(CommonStateObject):
 
     @with_phil
     def __eq__(self, other):
-        if hasattr(other, 'id'):
+        if hasattr(other, "id"):
             return self.id == other.id
         return NotImplemented
 
     def __bool__(self):
         with phil:
             return bool(self.id)
+
     __nonzero__ = __bool__
 
     def __getnewargs__(self):
@@ -370,6 +372,7 @@ class HLObject(CommonStateObject):
     def __getstate__(self):
         # Pickle protocols 0 and 1 use this instead of __getnewargs__
         raise TypeError("h5py objects cannot be pickled")
+
 
 # --- Dictionary-style interface ----------------------------------------------
 
@@ -390,13 +393,14 @@ class KeysViewHDF5(KeysView):
 
     __repr__ = __str__
 
+
 class ValuesViewHDF5(ValuesView):
 
     """
-        Wraps e.g. a Group or AttributeManager to provide a value view.
+    Wraps e.g. a Group or AttributeManager to provide a value view.
 
-        Note that __contains__ will have poor performance as it has
-        to scan all the links or attributes.
+    Note that __contains__ will have poor performance as it has
+    to scan all the links or attributes.
     """
 
     def __contains__(self, value):
@@ -420,7 +424,7 @@ class ValuesViewHDF5(ValuesView):
 class ItemsViewHDF5(ItemsView):
 
     """
-        Wraps e.g. a Group or AttributeManager to provide an items view.
+    Wraps e.g. a Group or AttributeManager to provide an items view.
     """
 
     def __contains__(self, item):
@@ -444,35 +448,36 @@ class ItemsViewHDF5(ItemsView):
 class MappingHDF5(Mapping):
 
     """
-        Wraps a Group, AttributeManager or DimensionManager object to provide
-        an immutable mapping interface.
+    Wraps a Group, AttributeManager or DimensionManager object to provide
+    an immutable mapping interface.
 
-        We don't inherit directly from MutableMapping because certain
-        subclasses, for example DimensionManager, are read-only.
+    We don't inherit directly from MutableMapping because certain
+    subclasses, for example DimensionManager, are read-only.
     """
+
     def keys(self):
-        """ Get a view object on member names """
+        """Get a view object on member names"""
         return KeysViewHDF5(self)
 
     def values(self):
-        """ Get a view object on member objects """
+        """Get a view object on member objects"""
         return ValuesViewHDF5(self)
 
     def items(self):
-        """ Get a view object on member items """
+        """Get a view object on member items"""
         return ItemsViewHDF5(self)
 
     def _ipython_key_completions_(self):
-        """ Custom tab completions for __getitem__ in IPython >=5.0. """
+        """Custom tab completions for __getitem__ in IPython >=5.0."""
         return sorted(self.keys())
 
 
 class MutableMappingHDF5(MappingHDF5, MutableMapping):
 
     """
-        Wraps a Group or AttributeManager object to provide a mutable
-        mapping interface, in contrast to the read-only mapping of
-        MappingHDF5.
+    Wraps a Group or AttributeManager object to provide a mutable
+    mapping interface, in contrast to the read-only mapping of
+    MappingHDF5.
     """
 
     pass
@@ -481,11 +486,12 @@ class MutableMappingHDF5(MappingHDF5, MutableMapping):
 class Empty:
 
     """
-        Proxy object to represent empty/null dataspaces (a.k.a H5S_NULL).
+    Proxy object to represent empty/null dataspaces (a.k.a H5S_NULL).
 
-        This can have an associated dtype, but has no shape or data. This is not
-        the same as an array with shape (0,).
+    This can have an associated dtype, but has no shape or data. This is not
+    the same as an array with shape (0,).
     """
+
     shape = None
     size = None
 
@@ -521,6 +527,7 @@ def product(nums):
 # but to be cautious, this code comes from cached-property (Copyright (c) 2015,
 # Daniel Greenfeld, BSD license), where it is attributed to bottle (Copyright
 # (c) 2009-2022, Marcel Hellkamp, MIT license).
+
 
 class cached_property(object):
     def __init__(self, func):

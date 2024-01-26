@@ -902,7 +902,6 @@ class BaseGeometry(shapely.Geometry):
 
 
 class BaseMultipartGeometry(BaseGeometry):
-
     __slots__ = []
 
     @property

@@ -13,11 +13,15 @@ from tidy3d.plugins.smatrix.smatrix import Port, ComponentModeler
 from tidy3d.plugins.smatrix.smatrix import ComponentModeler
 from ..utils import clear_tmp, run_emulated
 
-WAVEGUIDE = td.Structure(geometry=td.Box(size=(100, 0.5, 0.5)), medium=td.Medium(permittivity=4.0))
+WAVEGUIDE = td.Structure(
+    geometry=td.Box(size=(100, 0.5, 0.5)), medium=td.Medium(permittivity=4.0)
+)
 PLANE = td.Box(center=(0, 0, 0), size=(5, 0, 5))
 SIM_SIZE = (5, 5, 5)
 SRC = td.PointDipole(
-    center=(0, 0, 0), source_time=td.GaussianPulse(freq0=2e14, fwidth=1e13), polarization="Ex"
+    center=(0, 0, 0),
+    source_time=td.GaussianPulse(freq0=2e14, fwidth=1e13),
+    polarization="Ex",
 )
 
 
@@ -62,7 +66,9 @@ def test_mode_solver_custom_medium():
     freq0 = td.constants.C_0 / 1.0
     n = np.array([1.5, 5])
     n = n[:, None, None, None]
-    n_data = ScalarFieldDataArray(n, coords=dict(x=x_custom, y=y_custom, z=z_custom, f=[freq0]))
+    n_data = ScalarFieldDataArray(
+        n, coords=dict(x=x_custom, y=y_custom, z=z_custom, f=[freq0])
+    )
     mat_custom = td.CustomMedium.from_nk(n_data, interp_method="nearest")
 
     waveguide = td.Structure(geometry=td.Box(size=(100, 0.5, 0.5)), medium=mat_custom)
@@ -119,7 +125,10 @@ def test_mode_solver_angle_bend():
     # put plane entirely in the symmetry quadrant rather than sitting on its center
     plane = td.Box(center=(0, 0.5, 0), size=(1, 0, 1))
     ms = ModeSolver(
-        simulation=simulation, plane=plane, mode_spec=mode_spec, freqs=[td.constants.C_0 / 1.0]
+        simulation=simulation,
+        plane=plane,
+        mode_spec=mode_spec,
+        freqs=[td.constants.C_0 / 1.0],
     )
     modes = ms.solve()
     # Plot field
@@ -150,11 +159,16 @@ def test_mode_solver_2D():
         sources=[SRC],
     )
     ms = ModeSolver(
-        simulation=simulation, plane=PLANE, mode_spec=mode_spec, freqs=[td.constants.C_0 / 1.0]
+        simulation=simulation,
+        plane=PLANE,
+        mode_spec=mode_spec,
+        freqs=[td.constants.C_0 / 1.0],
     )
     modes = ms.solve()
 
-    mode_spec = td.ModeSpec(num_modes=3, filter_pol="te", precision="double", num_pml=(10, 0))
+    mode_spec = td.ModeSpec(
+        num_modes=3, filter_pol="te", precision="double", num_pml=(10, 0)
+    )
     simulation = td.Simulation(
         size=(SIM_SIZE[0], SIM_SIZE[1], 0),
         grid_spec=td.GridSpec(wavelength=1.0),
@@ -163,7 +177,10 @@ def test_mode_solver_2D():
         sources=[SRC],
     )
     ms = ModeSolver(
-        simulation=simulation, plane=PLANE, mode_spec=mode_spec, freqs=[td.constants.C_0 / 1.0]
+        simulation=simulation,
+        plane=PLANE,
+        mode_spec=mode_spec,
+        freqs=[td.constants.C_0 / 1.0],
     )
     modes = ms.solve()
 
@@ -176,7 +193,10 @@ def test_mode_solver_2D():
         sources=[SRC],
     )
     ms = ModeSolver(
-        simulation=simulation, plane=PLANE, mode_spec=mode_spec, freqs=[td.constants.C_0 / 1.0]
+        simulation=simulation,
+        plane=PLANE,
+        mode_spec=mode_spec,
+        freqs=[td.constants.C_0 / 1.0],
     )
     modes = ms.solve()
 

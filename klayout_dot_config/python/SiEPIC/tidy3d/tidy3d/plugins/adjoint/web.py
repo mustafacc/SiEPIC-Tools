@@ -136,7 +136,9 @@ def run_bwd(
     grad_eps_data_fwd = sim_data_fwd.grad_eps_data
 
     # make and run adjoint simulation
-    fwidth_adj = sim_data_fwd.simulation._fwidth_adjoint  # pylint:disable=protected-access
+    fwidth_adj = (
+        sim_data_fwd.simulation._fwidth_adjoint
+    )  # pylint:disable=protected-access
     sim_adj = sim_data_vjp.make_adjoint_simulation(fwidth=fwidth_adj)
     sim_data_adj = run(
         simulation=sim_adj,
@@ -149,7 +151,9 @@ def run_bwd(
     grad_data_adj = sim_data_adj.grad_data
 
     # get gradient and insert into the resulting simulation structure medium
-    sim_vjp = sim_data_vjp.simulation.store_vjp(grad_data_fwd, grad_data_adj, grad_eps_data_fwd)
+    sim_vjp = sim_data_vjp.simulation.store_vjp(
+        grad_data_fwd, grad_data_adj, grad_eps_data_fwd
+    )
 
     return (sim_vjp,)
 
@@ -211,13 +215,19 @@ def run_async(
         Contains the :class:`.JaxSimulationData` of each :class:`.JaxSimulation`.
     """
 
-    simulations = {_task_name_orig(i, task_name_suffix): sim for i, sim in enumerate(simulations)}
+    simulations = {
+        _task_name_orig(i, task_name_suffix): sim for i, sim in enumerate(simulations)
+    }
 
-    task_info = {task_name: jax_sim.to_simulation() for task_name, jax_sim in simulations.items()}
+    task_info = {
+        task_name: jax_sim.to_simulation() for task_name, jax_sim in simulations.items()
+    }
 
     # TODO: anyone know a better syntax for this?
     sims_tidy3d = {str(task_name): sim for task_name, (sim, _) in task_info.items()}
-    jax_infos = {str(task_name): jax_info for task_name, (_, jax_info) in task_info.items()}
+    jax_infos = {
+        str(task_name): jax_info for task_name, (_, jax_info) in task_info.items()
+    }
 
     # run using regular tidy3d simulation running fn
     batch_data_tidy3d = tidy3d_run_async_fn(
@@ -236,7 +246,9 @@ def run_async(
         task_name = _task_name_orig(i, task_name_suffix)
         sim_data_tidy3d = batch_data_tidy3d[task_name]
         jax_info = jax_infos[str(task_name)]
-        jax_sim_data = JaxSimulationData.from_sim_data(sim_data_tidy3d, jax_info=jax_info)
+        jax_sim_data = JaxSimulationData.from_sim_data(
+            sim_data_tidy3d, jax_info=jax_info
+        )
         jax_batch_data.append(jax_sim_data)
 
     return jax_batch_data
@@ -276,7 +288,9 @@ def run_async_fwd(
     batch_data_orig = []
     for i, sim_data_fwd in enumerate(batch_data_fwd):
         sim_orig = simulations[i]
-        sim_data_orig = sim_data_fwd.copy(update=dict(grad_data=(), simulation=sim_orig))
+        sim_data_orig = sim_data_fwd.copy(
+            update=dict(grad_data=(), simulation=sim_orig)
+        )
         batch_data_orig.append(sim_data_orig)
 
     return batch_data_orig, (batch_data_fwd,)
@@ -310,7 +324,9 @@ def run_async_bwd(
     # make and run adjoint simulation
     sims_adj = []
     for i, sim_data_fwd in enumerate(batch_data_fwd):
-        fwidth_adj = sim_data_fwd.simulation._fwidth_adjoint  # pylint:disable=protected-access
+        fwidth_adj = (
+            sim_data_fwd.simulation._fwidth_adjoint
+        )  # pylint:disable=protected-access
         sim_data_vjp = batch_data_vjp[i]
         sim_adj = sim_data_vjp.make_adjoint_simulation(fwidth=fwidth_adj)
         sims_adj.append(sim_adj)
@@ -326,14 +342,17 @@ def run_async_bwd(
     )
 
     sims_vjp = []
-    for i, (sim_data_fwd, sim_data_adj) in enumerate(zip(batch_data_fwd, batch_data_adj)):
-
+    for i, (sim_data_fwd, sim_data_adj) in enumerate(
+        zip(batch_data_fwd, batch_data_adj)
+    ):
         grad_data_fwd = sim_data_fwd.grad_data
         grad_data_adj = sim_data_adj.grad_data
         grad_data_eps_fwd = sim_data_fwd.grad_eps_data
 
         sim_data_vjp = batch_data_vjp[i]
-        sim_vjp = sim_data_vjp.simulation.store_vjp(grad_data_fwd, grad_data_adj, grad_data_eps_fwd)
+        sim_vjp = sim_data_vjp.simulation.store_vjp(
+            grad_data_fwd, grad_data_adj, grad_data_eps_fwd
+        )
         sims_vjp.append(sim_vjp)
 
     return (sims_vjp,)

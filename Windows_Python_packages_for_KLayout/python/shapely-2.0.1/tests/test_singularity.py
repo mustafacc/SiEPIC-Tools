@@ -3,7 +3,6 @@ from shapely.geometry import Polygon
 
 
 class PolygonTestCase(unittest.TestCase):
-
     def test_polygon_3(self):
         p = (1.0, 1.0)
         poly = Polygon([p, p, p])

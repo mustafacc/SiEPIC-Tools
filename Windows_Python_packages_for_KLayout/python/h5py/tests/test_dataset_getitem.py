@@ -50,30 +50,29 @@ from .common import ut, TestCase
 
 
 class TestEmpty(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
         sid = h5py.h5s.create(h5py.h5s.NULL)
         tid = h5py.h5t.C_S1.copy()
         tid.set_size(10)
-        dsid = h5py.h5d.create(self.f.id, b'x', tid, sid)
+        dsid = h5py.h5d.create(self.f.id, b"x", tid, sid)
         self.dset = h5py.Dataset(dsid)
         self.empty_obj = h5py.Empty(np.dtype("S10"))
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 0)
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, None)
 
     def test_size(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.size, None)
 
     def test_nbytes(self):
-        """ Verify nbytes """
+        """Verify nbytes"""
         self.assertEqual(self.dset.nbytes, 0)
 
     def test_ellipsis(self):
@@ -83,129 +82,131 @@ class TestEmpty(TestCase):
         self.assertEqual(self.dset[()], self.empty_obj)
 
     def test_slice(self):
-        """ slice -> ValueError """
+        """slice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0:4]
 
     def test_multi_block_slice(self):
-        """ MultiBlockSlice -> ValueError """
+        """MultiBlockSlice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[h5py.MultiBlockSlice()]
 
     def test_index(self):
-        """ index -> ValueError """
+        """index -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0]
 
     def test_indexlist(self):
-        """ index list -> ValueError """
+        """index list -> ValueError"""
         with self.assertRaises(ValueError):
-            self.dset[[1,2,5]]
+            self.dset[[1, 2, 5]]
 
     def test_mask(self):
-        """ mask -> ValueError """
-        mask = np.array(True, dtype='bool')
+        """mask -> ValueError"""
+        mask = np.array(True, dtype="bool")
         with self.assertRaises(ValueError):
             self.dset[mask]
 
     def test_fieldnames(self):
-        """ field name -> ValueError """
+        """field name -> ValueError"""
         with self.assertRaises(ValueError):
-            self.dset['field']
+            self.dset["field"]
 
 
 class TestScalarFloat(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.array(42.5, dtype='f')
-        self.dset = self.f.create_dataset('x', data=self.data)
+        self.data = np.array(42.5, dtype="f")
+        self.dset = self.f.create_dataset("x", data=self.data)
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 0)
 
     def test_size(self):
-        """ Verify size """
+        """Verify size"""
         self.assertEqual(self.dset.size, 1)
 
     def test_nbytes(self):
-        """ Verify nbytes """
-        self.assertEqual(self.dset.nbytes, self.data.dtype.itemsize)  # not sure if 'f' is always alias for 'f4'
+        """Verify nbytes"""
+        self.assertEqual(
+            self.dset.nbytes, self.data.dtype.itemsize
+        )  # not sure if 'f' is always alias for 'f4'
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, tuple())
 
     def test_ellipsis(self):
-        """ Ellipsis -> scalar ndarray """
+        """Ellipsis -> scalar ndarray"""
         out = self.dset[...]
         self.assertArrayEqual(out, self.data)
 
     def test_tuple(self):
-        """ () -> bare item """
+        """() -> bare item"""
         out = self.dset[()]
         self.assertArrayEqual(out, self.data.item())
 
     def test_slice(self):
-        """ slice -> ValueError """
+        """slice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0:4]
 
     def test_multi_block_slice(self):
-        """ MultiBlockSlice -> ValueError """
+        """MultiBlockSlice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[h5py.MultiBlockSlice()]
 
     def test_index(self):
-        """ index -> ValueError """
+        """index -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0]
 
     # FIXME: NumPy has IndexError instead
     def test_indexlist(self):
-        """ index list -> ValueError """
+        """index list -> ValueError"""
         with self.assertRaises(ValueError):
-            self.dset[[1,2,5]]
+            self.dset[[1, 2, 5]]
 
     # FIXME: NumPy permits this
     def test_mask(self):
-        """ mask -> ValueError """
-        mask = np.array(True, dtype='bool')
+        """mask -> ValueError"""
+        mask = np.array(True, dtype="bool")
         with self.assertRaises(ValueError):
             self.dset[mask]
 
     def test_fieldnames(self):
-        """ field name -> ValueError (no fields) """
+        """field name -> ValueError (no fields)"""
         with self.assertRaises(ValueError):
-            self.dset['field']
+            self.dset["field"]
 
 
 class TestScalarCompound(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.array((42.5, -118, "Hello"), dtype=[('a', 'f'), ('b', 'i'), ('c', '|S10')])
-        self.dset = self.f.create_dataset('x', data=self.data)
+        self.data = np.array(
+            (42.5, -118, "Hello"), dtype=[("a", "f"), ("b", "i"), ("c", "|S10")]
+        )
+        self.dset = self.f.create_dataset("x", data=self.data)
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 0)
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, tuple())
 
     def test_size(self):
-        """ Verify size """
+        """Verify size"""
         self.assertEqual(self.dset.size, 1)
 
     def test_nbytes(self):
-        """ Verify nbytes """
+        """Verify nbytes"""
         self.assertEqual(self.dset.nbytes, self.data.dtype.itemsize)
 
     def test_ellipsis(self):
-        """ Ellipsis -> scalar ndarray """
+        """Ellipsis -> scalar ndarray"""
         out = self.dset[...]
         # assertArrayEqual doesn't work with compounds; do manually
         self.assertIsInstance(out, np.ndarray)
@@ -213,159 +214,159 @@ class TestScalarCompound(TestCase):
         self.assertEqual(out.dtype, self.data.dtype)
 
     def test_tuple(self):
-        """ () -> np.void instance """
+        """() -> np.void instance"""
         out = self.dset[()]
         self.assertIsInstance(out, np.void)
         self.assertEqual(out.dtype, self.data.dtype)
 
     def test_slice(self):
-        """ slice -> ValueError """
+        """slice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0:4]
 
     def test_multi_block_slice(self):
-        """ MultiBlockSlice -> ValueError """
+        """MultiBlockSlice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[h5py.MultiBlockSlice()]
 
     def test_index(self):
-        """ index -> ValueError """
+        """index -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0]
 
     # FIXME: NumPy has IndexError instead
     def test_indexlist(self):
-        """ index list -> ValueError """
+        """index list -> ValueError"""
         with self.assertRaises(ValueError):
-            self.dset[[1,2,5]]
+            self.dset[[1, 2, 5]]
 
     # FIXME: NumPy permits this
     def test_mask(self):
-        """ mask -> ValueError  """
-        mask = np.array(True, dtype='bool')
+        """mask -> ValueError"""
+        mask = np.array(True, dtype="bool")
         with self.assertRaises(ValueError):
             self.dset[mask]
 
     # FIXME: NumPy returns a scalar ndarray
     def test_fieldnames(self):
-        """ field name -> bare value """
-        out = self.dset['a']
+        """field name -> bare value"""
+        out = self.dset["a"]
         self.assertIsInstance(out, np.float32)
-        self.assertEqual(out, self.dset['a'])
+        self.assertEqual(out, self.dset["a"])
 
 
 class TestScalarArray(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.dt = np.dtype('(3,2)f')
-        self.data = np.array([(3.2, -119), (42, 99.8), (3.14, 0)], dtype='f')
-        self.dset = self.f.create_dataset('x', (), dtype=self.dt)
+        self.dt = np.dtype("(3,2)f")
+        self.data = np.array([(3.2, -119), (42, 99.8), (3.14, 0)], dtype="f")
+        self.dset = self.f.create_dataset("x", (), dtype=self.dt)
         self.dset[...] = self.data
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.data.ndim, 2)
         self.assertEqual(self.dset.ndim, 0)
 
     def test_size(self):
-        """ Verify size """
+        """Verify size"""
         self.assertEqual(self.dset.size, 1)
 
     def test_nbytes(self):
-        """ Verify nbytes """
-        self.assertEqual(self.dset.nbytes, self.dset.dtype.itemsize)  # not sure if 'f' is always alias for 'f4'
+        """Verify nbytes"""
+        self.assertEqual(
+            self.dset.nbytes, self.dset.dtype.itemsize
+        )  # not sure if 'f' is always alias for 'f4'
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.data.shape, (3, 2))
         self.assertEqual(self.dset.shape, tuple())
 
     def test_ellipsis(self):
-        """ Ellipsis -> ndarray promoted to underlying shape """
+        """Ellipsis -> ndarray promoted to underlying shape"""
         out = self.dset[...]
         self.assertArrayEqual(out, self.data)
 
     def test_tuple(self):
-        """ () -> same as ellipsis """
+        """() -> same as ellipsis"""
         out = self.dset[...]
         self.assertArrayEqual(out, self.data)
 
     def test_slice(self):
-        """ slice -> ValueError """
+        """slice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0:4]
 
     def test_multi_block_slice(self):
-        """ MultiBlockSlice -> ValueError """
+        """MultiBlockSlice -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[h5py.MultiBlockSlice()]
 
     def test_index(self):
-        """ index -> ValueError """
+        """index -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[0]
 
     def test_indexlist(self):
-        """ index list -> ValueError """
+        """index list -> ValueError"""
         with self.assertRaises(ValueError):
             self.dset[[]]
 
     def test_mask(self):
-        """ mask -> ValueError """
-        mask = np.array(True, dtype='bool')
+        """mask -> ValueError"""
+        mask = np.array(True, dtype="bool")
         with self.assertRaises(ValueError):
             self.dset[mask]
 
     def test_fieldnames(self):
-        """ field name -> ValueError (no fields) """
+        """field name -> ValueError (no fields)"""
         with self.assertRaises(ValueError):
-            self.dset['field']
+            self.dset["field"]
 
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 8, 7), 'HDF5 1.8.7+ required')
+@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 8, 7), "HDF5 1.8.7+ required")
 class Test1DZeroFloat(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.ones((0,), dtype='f')
-        self.dset = self.f.create_dataset('x', data=self.data)
+        self.data = np.ones((0,), dtype="f")
+        self.dset = self.f.create_dataset("x", data=self.data)
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 1)
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, (0,))
 
     def test_ellipsis(self):
-        """ Ellipsis -> ndarray of matching shape """
+        """Ellipsis -> ndarray of matching shape"""
         self.assertNumpyBehavior(self.dset, self.data, np.s_[...])
 
     def test_tuple(self):
-        """ () -> same as ellipsis """
+        """() -> same as ellipsis"""
         self.assertNumpyBehavior(self.dset, self.data, np.s_[()])
 
     def test_slice(self):
-        """ slice -> ndarray of shape (0,) """
+        """slice -> ndarray of shape (0,)"""
         self.assertNumpyBehavior(self.dset, self.data, np.s_[0:4])
 
     def test_slice_stop_less_than_start(self):
         self.assertNumpyBehavior(self.dset, self.data, np.s_[7:5])
 
     def test_index(self):
-        """ index -> out of range """
+        """index -> out of range"""
         with self.assertRaises(IndexError):
             self.dset[0]
 
     def test_indexlist(self):
-        """ index list """
+        """index list"""
         self.assertNumpyBehavior(self.dset, self.data, np.s_[[]])
 
     def test_mask(self):
-        """ mask -> ndarray of matching shape """
-        mask = np.ones((0,), dtype='bool')
+        """mask -> ndarray of matching shape"""
+        mask = np.ones((0,), dtype="bool")
         self.assertNumpyBehavior(
             self.dset,
             self.data,
@@ -375,24 +376,23 @@ class Test1DZeroFloat(TestCase):
         )
 
     def test_fieldnames(self):
-        """ field name -> ValueError (no fields) """
+        """field name -> ValueError (no fields)"""
         with self.assertRaises(ValueError):
-            self.dset['field']
+            self.dset["field"]
 
 
 class Test1DFloat(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.arange(13).astype('f')
-        self.dset = self.f.create_dataset('x', data=self.data)
+        self.data = np.arange(13).astype("f")
+        self.dset = self.f.create_dataset("x", data=self.data)
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 1)
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, (13,))
 
     def test_ellipsis(self):
@@ -420,7 +420,7 @@ class Test1DFloat(TestCase):
         self.assertNumpyBehavior(self.dset, self.data, np.s_[100:400:3])
 
     def test_slice_backwards(self):
-        """ we disallow negative steps """
+        """we disallow negative steps"""
         with self.assertRaises(ValueError):
             self.dset[::-1]
 
@@ -439,7 +439,7 @@ class Test1DFloat(TestCase):
             self.dset[None]
 
     def test_index_illegal(self):
-        """ Illegal slicing argument """
+        """Illegal slicing argument"""
         with self.assertRaises(TypeError):
             self.dset[{}]
 
@@ -448,7 +448,7 @@ class Test1DFloat(TestCase):
             self.dset[100]
 
     def test_indexlist_simple(self):
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[[1,2,5]])
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[[1, 2, 5]])
 
     def test_indexlist_numpyarray(self):
         self.assertNumpyBehavior(self.dset, self.data, np.s_[np.array([1, 2, 5])])
@@ -470,21 +470,21 @@ class Test1DFloat(TestCase):
             self.dset[[100]]
 
     def test_indexlist_nonmonotonic(self):
-        """ we require index list values to be strictly increasing """
+        """we require index list values to be strictly increasing"""
         with self.assertRaises(TypeError):
-            self.dset[[1,3,2]]
+            self.dset[[1, 3, 2]]
 
     def test_indexlist_monotonic_negative(self):
         # This should work: indices are logically increasing
-        self.assertNumpyBehavior(self.dset, self.data,  np.s_[[0, 2, -2]])
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[[0, 2, -2]])
 
         with self.assertRaises(TypeError):
             self.dset[[-2, -3]]
 
     def test_indexlist_repeated(self):
-        """ we forbid repeated index values """
+        """we forbid repeated index values"""
         with self.assertRaises(TypeError):
-            self.dset[[1,1,2]]
+            self.dset[[1, 1, 2]]
 
     def test_mask_true(self):
         self.assertNumpyBehavior(
@@ -514,63 +514,63 @@ class Test1DFloat(TestCase):
         )
 
     def test_mask_wrongsize(self):
-        """ we require the boolean mask shape to match exactly """
+        """we require the boolean mask shape to match exactly"""
         with self.assertRaises(TypeError):
-            self.dset[np.ones((2,), dtype='bool')]
+            self.dset[np.ones((2,), dtype="bool")]
 
     def test_fieldnames(self):
-        """ field name -> ValueError (no fields) """
+        """field name -> ValueError (no fields)"""
         with self.assertRaises(ValueError):
-            self.dset['field']
+            self.dset["field"]
 
 
-@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 8, 7), 'HDF5 1.8.7+ required')
+@ut.skipUnless(h5py.version.hdf5_version_tuple >= (1, 8, 7), "HDF5 1.8.7+ required")
 class Test2DZeroFloat(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.ones((0,3), dtype='f')
-        self.dset = self.f.create_dataset('x', data=self.data)
+        self.data = np.ones((0, 3), dtype="f")
+        self.dset = self.f.create_dataset("x", data=self.data)
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 2)
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, (0, 3))
 
     def test_indexlist(self):
-        """ see issue #473 """
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[:,[0,1,2]])
+        """see issue #473"""
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[:, [0, 1, 2]])
 
 
 class Test2DFloat(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.data = np.ones((5,3), dtype='f')
-        self.dset = self.f.create_dataset('x', data=self.data)
+        self.data = np.ones((5, 3), dtype="f")
+        self.dset = self.f.create_dataset("x", data=self.data)
 
     def test_ndim(self):
-        """ Verify number of dimensions """
+        """Verify number of dimensions"""
         self.assertEqual(self.dset.ndim, 2)
 
     def test_size(self):
-        """ Verify size """
+        """Verify size"""
         self.assertEqual(self.dset.size, 15)
 
     def test_nbytes(self):
-        """ Verify nbytes """
-        self.assertEqual(self.dset.nbytes, 15*self.data.dtype.itemsize)  # not sure if 'f' is always alias for 'f4'
+        """Verify nbytes"""
+        self.assertEqual(
+            self.dset.nbytes, 15 * self.data.dtype.itemsize
+        )  # not sure if 'f' is always alias for 'f4'
 
     def test_shape(self):
-        """ Verify shape """
+        """Verify shape"""
         self.assertEqual(self.dset.shape, (5, 3))
 
     def test_indexlist(self):
-        """ see issue #473 """
-        self.assertNumpyBehavior(self.dset, self.data, np.s_[:,[0,1,2]])
+        """see issue #473"""
+        self.assertNumpyBehavior(self.dset, self.data, np.s_[:, [0, 1, 2]])
 
     def test_index_emptylist(self):
         self.assertNumpyBehavior(self.dset, self.data, np.s_[:, []])
@@ -578,12 +578,11 @@ class Test2DFloat(TestCase):
 
 
 class TestVeryLargeArray(TestCase):
-
     def setUp(self):
         TestCase.setUp(self)
-        self.dset = self.f.create_dataset('x', shape=(2**15, 2**16))
+        self.dset = self.f.create_dataset("x", shape=(2**15, 2**16))
 
-    @ut.skipIf(sys.maxsize < 2**31, 'Maximum integer size >= 2**31 required')
+    @ut.skipIf(sys.maxsize < 2**31, "Maximum integer size >= 2**31 required")
     def test_size(self):
         self.assertEqual(self.dset.size, 2**31)
 
@@ -595,9 +594,15 @@ def test_read_no_fill_value(writable_file):
     dcpl = h5py.h5p.create(h5py.h5p.DATASET_CREATE)
     dcpl.set_chunk((1,))
     dcpl.set_fill_time(h5py.h5d.FILL_TIME_NEVER)
-    ds = h5py.Dataset(h5py.h5d.create(
-        writable_file.id, b'a', h5py.h5t.IEEE_F64LE, h5py.h5s.create_simple((5,)), dcpl
-    ))
+    ds = h5py.Dataset(
+        h5py.h5d.create(
+            writable_file.id,
+            b"a",
+            h5py.h5t.IEEE_F64LE,
+            h5py.h5s.create_simple((5,)),
+            dcpl,
+        )
+    )
     np.testing.assert_array_equal(ds[:3], np.zeros(3, np.float64))
 
 
@@ -605,16 +610,17 @@ class TestBoolIndex(TestCase):
     """
     Tests for indexing with Boolean arrays
     """
+
     def setUp(self):
         super().setUp()
-        self.arr = np.arange(9).reshape(3,-1)
-        self.dset = self.f.create_dataset('x', data=self.arr)
+        self.arr = np.arange(9).reshape(3, -1)
+        self.dset = self.f.create_dataset("x", data=self.arr)
 
     def test_select_first_axis(self):
-        sel = np.s_[[False, True, False],:]
+        sel = np.s_[[False, True, False], :]
         self.assertNumpyBehavior(self.dset, self.arr, sel)
 
     def test_wrong_size(self):
-        sel = np.s_[[False, True, False, False],:]
+        sel = np.s_[[False, True, False, False], :]
         with self.assertRaises(TypeError):
             self.dset[sel]

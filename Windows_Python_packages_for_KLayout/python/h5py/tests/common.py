@@ -27,7 +27,7 @@ import unittest as ut
 # See also h5py issue #263 and ipython #466
 # To test for this, run the testsuite with LC_ALL=C
 try:
-    testfile, fname = tempfile.mkstemp(chr(0x03b7))
+    testfile, fname = tempfile.mkstemp(chr(0x03B7))
 except UnicodeError:
     UNICODE_FILENAMES = False
 else:
@@ -41,25 +41,26 @@ else:
 class TestCase(ut.TestCase):
 
     """
-        Base class for unit tests.
+    Base class for unit tests.
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.tempdir = tempfile.mkdtemp(prefix='h5py-test_')
+        cls.tempdir = tempfile.mkdtemp(prefix="h5py-test_")
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.tempdir)
 
-    def mktemp(self, suffix='.hdf5', prefix='', dir=None):
+    def mktemp(self, suffix=".hdf5", prefix="", dir=None):
         if dir is None:
             dir = self.tempdir
         return tempfile.mktemp(suffix, prefix, dir=dir)
 
-    def mktemp_mpi(self, comm=None, suffix='.hdf5', prefix='', dir=None):
+    def mktemp_mpi(self, comm=None, suffix=".hdf5", prefix="", dir=None):
         if comm is None:
             from mpi4py import MPI
+
             comm = MPI.COMM_WORLD
         fname = None
         if comm.Get_rank() == 0:
@@ -68,7 +69,7 @@ class TestCase(ut.TestCase):
         return fname
 
     def setUp(self):
-        self.f = h5py.File(self.mktemp(), 'w')
+        self.f = h5py.File(self.mktemp(), "w")
 
     def tearDown(self):
         try:
@@ -95,43 +96,56 @@ class TestCase(ut.TestCase):
                 raise AssertionError("Item '%s' appears in b but not a" % x)
 
     def assertArrayEqual(self, dset, arr, message=None, precision=None):
-        """ Make sure dset and arr have the same shape, dtype and contents, to
-            within the given precision.
+        """Make sure dset and arr have the same shape, dtype and contents, to
+        within the given precision.
 
-            Note that dset may be a NumPy array or an HDF5 dataset.
+        Note that dset may be a NumPy array or an HDF5 dataset.
         """
         if precision is None:
             precision = 1e-5
         if message is None:
-            message = ''
+            message = ""
         else:
-            message = ' (%s)' % message
+            message = " (%s)" % message
 
         if np.isscalar(dset) or np.isscalar(arr):
-            assert np.isscalar(dset) and np.isscalar(arr), \
-                'Scalar/array mismatch ("%r" vs "%r")%s' % (dset, arr, message)
-            assert dset - arr < precision, \
-                "Scalars differ by more than %.3f%s" % (precision, message)
+            assert np.isscalar(dset) and np.isscalar(
+                arr
+            ), 'Scalar/array mismatch ("%r" vs "%r")%s' % (dset, arr, message)
+            assert dset - arr < precision, "Scalars differ by more than %.3f%s" % (
+                precision,
+                message,
+            )
             return
 
-        assert dset.shape == arr.shape, \
-            "Shape mismatch (%s vs %s)%s" % (dset.shape, arr.shape, message)
-        assert dset.dtype == arr.dtype, \
-            "Dtype mismatch (%s vs %s)%s" % (dset.dtype, arr.dtype, message)
+        assert dset.shape == arr.shape, "Shape mismatch (%s vs %s)%s" % (
+            dset.shape,
+            arr.shape,
+            message,
+        )
+        assert dset.dtype == arr.dtype, "Dtype mismatch (%s vs %s)%s" % (
+            dset.dtype,
+            arr.dtype,
+            message,
+        )
 
         if arr.dtype.names is not None:
             for n in arr.dtype.names:
-                message = '[FIELD %s] %s' % (n, message)
-                self.assertArrayEqual(dset[n], arr[n], message=message, precision=precision)
-        elif arr.dtype.kind in ('i', 'f'):
-            assert np.all(np.abs(dset[...] - arr[...]) < precision), \
-                "Arrays differ by more than %.3f%s" % (precision, message)
+                message = "[FIELD %s] %s" % (n, message)
+                self.assertArrayEqual(
+                    dset[n], arr[n], message=message, precision=precision
+                )
+        elif arr.dtype.kind in ("i", "f"):
+            assert np.all(
+                np.abs(dset[...] - arr[...]) < precision
+            ), "Arrays differ by more than %.3f%s" % (precision, message)
         else:
-            assert np.all(dset[...] == arr[...]), \
-                "Arrays are not equal (dtype %s) %s" % (arr.dtype.str, message)
+            assert np.all(
+                dset[...] == arr[...]
+            ), "Arrays are not equal (dtype %s) %s" % (arr.dtype.str, message)
 
     def assertNumpyBehavior(self, dset, arr, s, skip_fast_reader=False):
-        """ Apply slicing arguments "s" to both dset and arr.
+        """Apply slicing arguments "s" to both dset and arr.
 
         Succeeds if the results of the slicing are identical, or the
         exception raised is of the same type for both.
@@ -162,18 +176,18 @@ class TestCase(ut.TestCase):
                 with self.assertRaises(exc):
                     dset._fast_reader.read(s_fast)
 
+
 NUMPY_RELEASE_VERSION = tuple([int(i) for i in np.__version__.split(".")[0:2]])
 
+
 @contextmanager
-def closed_tempfile(suffix='', text=None):
+def closed_tempfile(suffix="", text=None):
     """
     Context manager which yields the path to a closed temporary file with the
     suffix `suffix`. The file will be deleted on exiting the context. An
     additional argument `text` can be provided to have the file contain `text`.
     """
-    with tempfile.NamedTemporaryFile(
-        'w+t', suffix=suffix, delete=False
-    ) as test_file:
+    with tempfile.NamedTemporaryFile("w+t", suffix=suffix, delete=False) as test_file:
         file_name = test_file.name
         if text is not None:
             test_file.write(text)
@@ -184,6 +198,7 @@ def closed_tempfile(suffix='', text=None):
 
 def insubprocess(f):
     """Runs a test in its own subprocess"""
+
     @wraps(f)
     def wrapper(request, *args, **kwargs):
         curr_test = inspect.getsourcefile(f) + "::" + request.node.name
@@ -196,24 +211,30 @@ def insubprocess(f):
         if defined:
             return f(request, *args, **kwargs)
         else:
-            os.environ[insub] = '1'
+            os.environ[insub] = "1"
             env = os.environ.copy()
-            env[insub] = '1'
-            env.update(getattr(f, 'subproc_env', {}))
+            env[insub] = "1"
+            env.update(getattr(f, "subproc_env", {}))
 
             with closed_tempfile() as stdout:
-                with open(stdout, 'w+t') as fh:
-                    rtn = subprocess.call([sys.executable, '-m', 'pytest', curr_test],
-                                          stdout=fh, stderr=fh, env=env)
-                with open(stdout, 'rt') as fh:
+                with open(stdout, "w+t") as fh:
+                    rtn = subprocess.call(
+                        [sys.executable, "-m", "pytest", curr_test],
+                        stdout=fh,
+                        stderr=fh,
+                        env=env,
+                    )
+                with open(stdout, "rt") as fh:
                     out = fh.read()
 
             assert rtn == 0, "\n" + out
+
     return wrapper
 
 
 def subproc_env(d):
     """Set environment variables for the @insubprocess decorator"""
+
     def decorator(f):
         f.subproc_env = d
         return f

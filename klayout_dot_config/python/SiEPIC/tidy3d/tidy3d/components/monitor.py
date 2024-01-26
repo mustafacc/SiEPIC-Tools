@@ -196,7 +196,9 @@ class AbstractFieldMonitor(Monitor, ABC):
             val = sum(interval_space) != 3
         return val
 
-    def downsampled_num_cells(self, num_cells: Tuple[int, int, int]) -> Tuple[int, int, int]:
+    def downsampled_num_cells(
+        self, num_cells: Tuple[int, int, int]
+    ) -> Tuple[int, int, int]:
         """Given a tuple of the number of cells spanned by the monitor along each dimension,
         return the number of cells one would have after downsampling based on ``interval_space``.
         """
@@ -350,7 +352,9 @@ class SurfaceIntegrationMonitor(Monitor, ABC):
         "Applies to surface monitors only, and defaults to ``'+'`` if not provided.",
     )
 
-    exclude_surfaces: Tuple[Literal["x-", "x+", "y-", "y+", "z-", "z+"], ...] = pydantic.Field(
+    exclude_surfaces: Tuple[
+        Literal["x-", "x+", "y-", "y+", "z-", "z+"], ...
+    ] = pydantic.Field(
         None,
         title="Excluded surfaces",
         description="Surfaces to exclude in the integration, if a volume monitor.",
@@ -364,14 +368,19 @@ class SurfaceIntegrationMonitor(Monitor, ABC):
             exclude_surfaces = monitor_dict.pop("exclude_surfaces", None)
             surface_monitors = self.surfaces(**monitor_dict)
             if exclude_surfaces:
-                return [mnt for mnt in surface_monitors if mnt.name[-2:] not in exclude_surfaces]
+                return [
+                    mnt
+                    for mnt in surface_monitors
+                    if mnt.name[-2:] not in exclude_surfaces
+                ]
             return surface_monitors
         return [self]
 
     @pydantic.root_validator(skip_on_failure=True)
     def normal_dir_exists_for_surface(cls, values):
         """If the monitor is a surface, set default ``normal_dir`` if not provided.
-        If the monitor is a box, warn that ``normal_dir`` is relevant only for surfaces."""
+        If the monitor is a box, warn that ``normal_dir`` is relevant only for surfaces.
+        """
         normal_dir = values.get("normal_dir")
         name = values.get("name")
         size = values.get("size")
@@ -490,7 +499,9 @@ class ModeSolverMonitor(AbstractModeMonitor):
 
     def storage_size(self, num_cells: int, tmesh: int) -> int:
         """Size of monitor storage given the number of points after discretization."""
-        return 6 * BYTES_COMPLEX * num_cells * len(self.freqs) * self.mode_spec.num_modes
+        return (
+            6 * BYTES_COMPLEX * num_cells * len(self.freqs) * self.mode_spec.num_modes
+        )
 
     @property
     def interval_space(self):
@@ -531,7 +542,9 @@ class FieldProjectionSurface(Tidy3dBaseModel):
         """Ensures that the monitor is a plane, i.e., its `size` attribute has exactly 1 zero"""
         size = val.size
         if size.count(0.0) != 1:
-            raise ValidationError(f"Monitor '{val.name}' must be planar, given size={size}")
+            raise ValidationError(
+                f"Monitor '{val.name}' must be planar, given size={size}"
+            )
         return val
 
 
@@ -561,7 +574,10 @@ class AbstractFieldProjectionMonitor(SurfaceIntegrationMonitor, FreqMonitor):
         return [
             FieldProjectionSurface(
                 monitor=FieldMonitor(
-                    center=surface.center, size=surface.size, freqs=self.freqs, name=surface.name
+                    center=surface.center,
+                    size=surface.size,
+                    freqs=self.freqs,
+                    name=surface.name,
                 ),
                 normal_dir=surface.normal_dir,
             )
@@ -739,9 +755,13 @@ class FieldProjectionKSpaceMonitor(AbstractFieldProjectionMonitor):
         maxabs_uy = max(list(values.get("uy")), key=abs)
         name = values.get("name")
         if maxabs_ux > 1:
-            raise SetupError(f"Entries of 'ux' must lie in the range [-1, 1] for monitor {name}.")
+            raise SetupError(
+                f"Entries of 'ux' must lie in the range [-1, 1] for monitor {name}."
+            )
         if maxabs_uy > 1:
-            raise SetupError(f"Entries of 'uy' must lie in the range [-1, 1] for monitor {name}.")
+            raise SetupError(
+                f"Entries of 'uy' must lie in the range [-1, 1] for monitor {name}."
+            )
         return values
 
     def storage_size(self, num_cells: int, tmesh: ArrayLike[float, 1]) -> int:

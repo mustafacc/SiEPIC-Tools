@@ -18,8 +18,7 @@ import numpy
 
 # All should be integers, except pre, as validating versions is more than is
 # needed for our use case
-_H5PY_VERSION_CLS = namedtuple("_H5PY_VERSION_CLS",
-                               "major minor bugfix pre post dev")
+_H5PY_VERSION_CLS = namedtuple("_H5PY_VERSION_CLS", "major minor bugfix pre post dev")
 
 hdf5_built_version_tuple = _h5.HDF5_VERSION_COMPILED_AGAINST
 
@@ -36,7 +35,7 @@ if version_tuple.dev is not None:
 hdf5_version_tuple = _h5.get_libversion()
 hdf5_version = "%d.%d.%d" % hdf5_version_tuple
 
-api_version_tuple = (1,8)
+api_version_tuple = (1, 8)
 api_version = "%d.%d" % api_version_tuple
 
 info = """\
@@ -53,13 +52,13 @@ cython (built with) %(cython_version)s
 numpy (built against) %(numpy_build_version)s
 HDF5 (built against) %(hdf5_build_version)s
 """ % {
-    'h5py': version,
-    'hdf5': hdf5_version,
-    'python': sys.version,
-    'platform': sys.platform,
-    'maxsize': sys.maxsize,
-    'numpy': numpy.__version__,
-    'cython_version': _h5.CYTHON_VERSION_COMPILED_WITH,
-    'numpy_build_version': _h5.NUMPY_VERSION_COMPILED_AGAINST,
-    'hdf5_build_version': "%d.%d.%d" % hdf5_built_version_tuple,
+    "h5py": version,
+    "hdf5": hdf5_version,
+    "python": sys.version,
+    "platform": sys.platform,
+    "maxsize": sys.maxsize,
+    "numpy": numpy.__version__,
+    "cython_version": _h5.CYTHON_VERSION_COMPILED_WITH,
+    "numpy_build_version": _h5.NUMPY_VERSION_COMPILED_AGAINST,
+    "hdf5_build_version": "%d.%d.%d" % hdf5_built_version_tuple,
 }

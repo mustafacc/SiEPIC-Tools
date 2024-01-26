@@ -44,14 +44,15 @@ file_lock = threading.RLock()  # Protects the file from concurrent access
 
 t = None  # We'll use this to store the active computation thread
 
+
 class ComputeThread(threading.Thread):
 
     """
-        Computes a slice of the Mandelbrot set, and saves it to the HDF5 file.
+    Computes a slice of the Mandelbrot set, and saves it to the HDF5 file.
     """
 
     def __init__(self, f, shape, escape, startcoords, extent, eventcall):
-        """ Set up a computation thread.
+        """Set up a computation thread.
 
         f: HDF5 File object
         shape: 2-tuple (NX, NY)
@@ -69,18 +70,18 @@ class ComputeThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        """ Perform computations and record the result to file """
+        """Perform computations and record the result to file"""
 
         nx, ny = self.shape
 
-        arr = np.ndarray((nx,ny), dtype='i')
+        arr = np.ndarray((nx, ny), dtype="i")
 
-        xincr = self.extent.real/nx
-        yincr = self.extent.imag/ny
+        xincr = self.extent.real / nx
+        yincr = self.extent.imag / ny
 
         def compute_escape(pos, escape):
-            """ Compute the number of steps required to escape """
-            z = 0+0j;
+            """Compute the number of steps required to escape"""
+            z = 0 + 0j
             for i in range(escape):
                 z = z**2 + pos
                 if abs(z) > 2:
@@ -88,32 +89,33 @@ class ComputeThread(threading.Thread):
             return i
 
         for x in range(nx):
-            if x%25 == 0: print("Computing row %d" % x)
+            if x % 25 == 0:
+                print("Computing row %d" % x)
             for y in range(ny):
-                pos = self.startcoords + complex(x*xincr, y*yincr)
-                arr[x,y] = compute_escape(pos, self.escape)
+                pos = self.startcoords + complex(x * xincr, y * yincr)
+                arr[x, y] = compute_escape(pos, self.escape)
 
         with file_lock:
             dsname = "slice%03d" % len(self.f)
-            dset = self.f.create_dataset(dsname, (nx, ny), 'i')
-            dset.attrs['shape'] = self.shape
-            dset.attrs['start'] = self.startcoords
-            dset.attrs['extent'] = self.extent
-            dset.attrs['escape'] = self.escape
+            dset = self.f.create_dataset(dsname, (nx, ny), "i")
+            dset.attrs["shape"] = self.shape
+            dset.attrs["start"] = self.startcoords
+            dset.attrs["extent"] = self.extent
+            dset.attrs["escape"] = self.escape
             dset[...] = arr
 
         print("Calculation for %s done" % dsname)
 
         self.eventcall()
 
+
 class ComputeWidget:
 
     """
-        Responsible for input widgets, and starting new computation threads.
+    Responsible for input widgets, and starting new computation threads.
     """
 
     def __init__(self, f, master, eventcall):
-
         self.f = f
 
         self.eventcall = eventcall
@@ -156,8 +158,12 @@ class ComputeWidget:
 
         entryframe.grid(row=0, rowspan=2, column=0)
 
-        self.suggestbutton = tk.Button(master=self.mainframe, text="Suggest", command=self.suggest)
-        self.computebutton = tk.Button(master=self.mainframe, text="Compute", command=self.compute)
+        self.suggestbutton = tk.Button(
+            master=self.mainframe, text="Suggest", command=self.suggest
+        )
+        self.computebutton = tk.Button(
+            master=self.mainframe, text="Compute", command=self.compute
+        )
 
         self.suggestbutton.grid(row=0, column=1)
         self.computebutton.grid(row=1, column=1)
@@ -165,7 +171,7 @@ class ComputeWidget:
         self.suggest = 0
 
     def compute(self, *args):
-        """ Validate input and start calculation thread.
+        """Validate input and start calculation thread.
 
         We use a global variable "t" to store the current thread, to make
         sure old threads are properly joined before they are discarded.
@@ -176,11 +182,15 @@ class ComputeWidget:
             nx = int(self.nxfield.get())
             ny = int(self.nyfield.get())
             escape = int(self.escapefield.get())
-            start = complex(float(self.startxfield.get()), float(self.startyfield.get()))
-            extent = complex(float(self.extentxfield.get()), float(self.extentyfield.get()))
-            if (nx<=0) or (ny<=0) or (escape<=0):
+            start = complex(
+                float(self.startxfield.get()), float(self.startyfield.get())
+            )
+            extent = complex(
+                float(self.extentxfield.get()), float(self.extentyfield.get())
+            )
+            if (nx <= 0) or (ny <= 0) or (escape <= 0):
                 raise ValueError("NX, NY and ESCAPE must be positive")
-            if abs(extent)==0:
+            if abs(extent) == 0:
                 raise ValueError("Extent must be finite")
         except (ValueError, TypeError) as e:
             print(e)
@@ -189,42 +199,57 @@ class ComputeWidget:
         if t is not None:
             t.join()
 
-        t = ComputeThread(self.f, (nx,ny), escape, start, extent, self.eventcall)
+        t = ComputeThread(self.f, (nx, ny), escape, start, extent, self.eventcall)
         t.start()
 
     def suggest(self, *args):
-        """ Populate the input fields with interesting locations """
+        """Populate the input fields with interesting locations"""
 
-        suggestions = [(200,200,50, -2, -1, 3, 2),
-                       (500, 500, 200, 0.110, -0.680, 0.05, 0.05),
-                       (200, 200, 1000, -0.16070135-5e-8, 1.0375665-5e-8, 1e-7, 1e-7),
-                       (500, 500, 100, -1, 0, 0.5, 0.5)]
+        suggestions = [
+            (200, 200, 50, -2, -1, 3, 2),
+            (500, 500, 200, 0.110, -0.680, 0.05, 0.05),
+            (200, 200, 1000, -0.16070135 - 5e-8, 1.0375665 - 5e-8, 1e-7, 1e-7),
+            (500, 500, 100, -1, 0, 0.5, 0.5),
+        ]
 
-        for entry, val in zip((self.nxfield, self.nyfield, self.escapefield,
-                self.startxfield, self.startyfield, self.extentxfield,
-                self.extentyfield), suggestions[self.suggest]):
+        for entry, val in zip(
+            (
+                self.nxfield,
+                self.nyfield,
+                self.escapefield,
+                self.startxfield,
+                self.startyfield,
+                self.extentxfield,
+                self.extentyfield,
+            ),
+            suggestions[self.suggest],
+        ):
             entry.delete(0, 999)
             entry.insert(0, repr(val))
 
-        self.suggest = (self.suggest+1)%len(suggestions)
+        self.suggest = (self.suggest + 1) % len(suggestions)
 
 
 class ViewWidget:
 
     """
-        Draws images using the datasets recorded in the HDF5 file.  Also
-        provides widgets to pick which dataset is displayed.
+    Draws images using the datasets recorded in the HDF5 file.  Also
+    provides widgets to pick which dataset is displayed.
     """
 
     def __init__(self, f, master):
-
         self.f = f
 
         self.mainframe = tk.Frame(master=master)
         self.lbutton = tk.Button(self.mainframe, text="<= Back", command=self.back)
         self.rbutton = tk.Button(self.mainframe, text="Next =>", command=self.forward)
-        self.loclabel = tk.Label(self.mainframe, text='To start, enter values and click "compute"')
-        self.infolabel = tk.Label(self.mainframe, text='Or, click the "suggest" button for interesting locations')
+        self.loclabel = tk.Label(
+            self.mainframe, text='To start, enter values and click "compute"'
+        )
+        self.infolabel = tk.Label(
+            self.mainframe,
+            text='Or, click the "suggest" button for interesting locations',
+        )
 
         self.fig = Figure(figsize=(5, 5), dpi=100)
         self.plot = self.fig.add_subplot(111)
@@ -242,25 +267,40 @@ class ViewWidget:
         self.jumptolast()
 
     def draw_fractal(self):
-        """ Read a dataset from the HDF5 file and display it """
+        """Read a dataset from the HDF5 file and display it"""
 
         with file_lock:
             name = list(self.f.keys())[self.index]
             dset = self.f[name]
             arr = dset[...]
-            start = dset.attrs['start']
-            extent = dset.attrs['extent']
-            self.loclabel["text"] = 'Displaying dataset "%s" (%d of %d)' % (dset.name, self.index+1, len(self.f))
-            self.infolabel["text"] = "%(shape)s pixels, starts at %(start)s, extent %(extent)s" % dset.attrs
+            start = dset.attrs["start"]
+            extent = dset.attrs["extent"]
+            self.loclabel["text"] = 'Displaying dataset "%s" (%d of %d)' % (
+                dset.name,
+                self.index + 1,
+                len(self.f),
+            )
+            self.infolabel["text"] = (
+                "%(shape)s pixels, starts at %(start)s, extent %(extent)s" % dset.attrs
+            )
 
         self.plot.clear()
-        self.plot.imshow(arr.transpose(), cmap='jet', aspect='auto', origin='lower',
-                         extent=(start.real, (start.real+extent.real),
-                                 start.imag, (start.imag+extent.imag)))
+        self.plot.imshow(
+            arr.transpose(),
+            cmap="jet",
+            aspect="auto",
+            origin="lower",
+            extent=(
+                start.real,
+                (start.real + extent.real),
+                start.imag,
+                (start.imag + extent.imag),
+            ),
+        )
         self.canvas.draw_idle()
 
     def back(self):
-        """ Go to the previous dataset (in ASCII order) """
+        """Go to the previous dataset (in ASCII order)"""
         if self.index == 0:
             print("Can't go back")
             return
@@ -268,35 +308,36 @@ class ViewWidget:
         self.draw_fractal()
 
     def forward(self):
-        """ Go to the next dataset (in ASCII order) """
-        if self.index == (len(self.f)-1):
+        """Go to the next dataset (in ASCII order)"""
+        if self.index == (len(self.f) - 1):
             print("Can't go forward")
             return
         self.index += 1
         self.draw_fractal()
 
-    def jumptolast(self,*args):
-        """ Jump to the last (ASCII order) dataset and display it """
+    def jumptolast(self, *args):
+        """Jump to the last (ASCII order) dataset and display it"""
         with file_lock:
             if len(self.f) == 0:
                 print("can't jump to last (no datasets)")
                 return
-            index = len(self.f)-1
+            index = len(self.f) - 1
         self.index = index
         self.draw_fractal()
 
 
-if __name__ == '__main__':
-
-    f = h5py.File('mandelbrot_gui.hdf5', 'a')
+if __name__ == "__main__":
+    f = h5py.File("mandelbrot_gui.hdf5", "a")
 
     root = tk.Tk()
 
     display = ViewWidget(f, root)
 
     root.bind("<<FractalEvent>>", display.jumptolast)
+
     def callback():
         root.event_generate("<<FractalEvent>>")
+
     compute = ComputeWidget(f, root, callback)
 
     display.mainframe.grid(row=0, column=0)

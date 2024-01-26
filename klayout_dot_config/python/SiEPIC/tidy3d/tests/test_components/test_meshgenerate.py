@@ -37,7 +37,12 @@ def validate_dl_multiple_interval(
 
     for i in range(num_intervals):
         validate_dl_in_interval(
-            dl_list[i], max_scale, left_dl[i], right_dl[i], max_dl_list[i], len_interval_list[i]
+            dl_list[i],
+            max_scale,
+            left_dl[i],
+            right_dl[i],
+            max_dl_list[i],
+            len_interval_list[i],
         )
 
     dl_list = np.concatenate(dl_list)
@@ -79,7 +84,9 @@ def test_uniform_grid_in_interval():
         right_dl = np.random.random(1)[0]
         max_dl = np.random.random(1)[0]
         max_scale = 1
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         assert np.any(dl - dl[0]) == False
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
@@ -88,7 +95,9 @@ def test_uniform_grid_in_interval():
         right_dl = left_dl
         max_scale = 1 + np.random.random(1)[0]
         max_dl = left_dl
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         assert np.any(dl - dl[0]) == False
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
@@ -97,7 +106,9 @@ def test_uniform_grid_in_interval():
         right_dl = np.random.random(1)[0] + len_interval
         max_scale = 1 + np.random.random(1)[0]
         max_dl = left_dl
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         assert len(dl) == 1
         assert dl[0] == len_interval
 
@@ -112,13 +123,17 @@ def test_asending_grid_in_interval():
     right_dl = 1.0
     max_dl = right_dl
 
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     # remaining part not sufficient to insert, but will not
     # violate max_scale by repearting 1st step
     len_interval = 1.0
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     # scaling
@@ -127,7 +142,9 @@ def test_asending_grid_in_interval():
     left_dl = 0.2
     right_dl = 1.0
     max_dl = right_dl
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     # randoms
@@ -143,12 +160,16 @@ def test_asending_grid_in_interval():
         len_interval = left_dl * max_scale * (1 - max_scale**N_step) / (1 - max_scale)
         len_interval *= np.random.random(1)[0]
 
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
         # opposite direction
         left_dl, right_dl = right_dl, left_dl
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
 
@@ -161,12 +182,16 @@ def test_asending_plateau_grid_in_interval():
     left_dl = 0.3
     right_dl = 10
     max_dl = 0.6
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     # # sufficient remaining part, can be inserted
     len_interval = 1.9
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     # randoms
@@ -181,7 +206,9 @@ def test_asending_plateau_grid_in_interval():
         len_interval = left_dl * max_scale * (1 - max_scale**N_step) / (1 - max_scale)
         len_interval += max_dl * np.random.randint(1, 100)
 
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
         # print(left_dl*max_scale)
         # print(max_dl)
@@ -189,7 +216,9 @@ def test_asending_plateau_grid_in_interval():
 
         # opposite direction
         left_dl, right_dl = right_dl, left_dl
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
 
@@ -201,7 +230,9 @@ def test_asending_plateau_desending_grid_in_interval():
     right_dl = 0.3
     max_dl = 0.5
     len_interval = 1.51
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     # randoms
@@ -215,11 +246,17 @@ def test_asending_plateau_desending_grid_in_interval():
         N_right_step = 1 + np.log(max_dl / right_dl) / np.log(max_scale)
         N_left_step = int(np.floor(N_left_step))
         N_right_step = int(np.floor(N_right_step))
-        len_interval = left_dl * max_scale * (1 - max_scale**N_left_step) / (1 - max_scale)
-        len_interval += right_dl * max_scale * (1 - max_scale**N_right_step) / (1 - max_scale)
+        len_interval = (
+            left_dl * max_scale * (1 - max_scale**N_left_step) / (1 - max_scale)
+        )
+        len_interval += (
+            right_dl * max_scale * (1 - max_scale**N_right_step) / (1 - max_scale)
+        )
         len_interval += max_dl * (1 + np.random.randint(1, 100))
 
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
 
@@ -231,7 +268,9 @@ def test_asending_desending_grid_in_interval():
     right_dl = 0.3
     max_dl = 1
     len_interval = 3.2
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
     max_scale = 2
@@ -239,7 +278,9 @@ def test_asending_desending_grid_in_interval():
     right_dl = 0.4
     max_dl = 1
     len_interval = 0.8
-    dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+    dl = MESHER.make_grid_in_interval(
+        left_dl, right_dl, max_dl, max_scale, len_interval
+    )
     # print(dl)
 
     # randoms
@@ -253,12 +294,18 @@ def test_asending_desending_grid_in_interval():
         N_right_step = 1 + np.log(max_dl / right_dl) / np.log(max_scale)
         N_left_step = int(np.floor(N_left_step))
         N_right_step = int(np.floor(N_right_step))
-        len_interval = left_dl * max_scale * (1 - max_scale**N_left_step) / (1 - max_scale)
-        len_interval += right_dl * max_scale * (1 - max_scale**N_right_step) / (1 - max_scale)
+        len_interval = (
+            left_dl * max_scale * (1 - max_scale**N_left_step) / (1 - max_scale)
+        )
+        len_interval += (
+            right_dl * max_scale * (1 - max_scale**N_right_step) / (1 - max_scale)
+        )
         len_interval -= max_dl
         len_interval *= np.random.random(1)[0]
 
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
 
@@ -274,12 +321,13 @@ def test_grid_in_interval():
 
         len_interval = np.random.randint(1, 100) * np.random.random(1)[0]
 
-        dl = MESHER.make_grid_in_interval(left_dl, right_dl, max_dl, max_scale, len_interval)
+        dl = MESHER.make_grid_in_interval(
+            left_dl, right_dl, max_dl, max_scale, len_interval
+        )
         validate_dl_in_interval(dl, max_scale, left_dl, right_dl, max_dl, len_interval)
 
 
 def test_grid_analytic_refinement():
-
     max_dl_list = np.array([0.5, 0.5, 0.4, 0.1, 0.4])
     len_interval_list = np.array([2.0, 0.5, 0.2, 0.1, 0.3])
     max_scale = 1.5
@@ -291,7 +339,6 @@ def test_grid_analytic_refinement():
 
 
 def test_grid_refinement():
-
     max_dl_list = np.array([0.5, 0.4, 0.1, 0.4])
     len_interval_list = np.array([0.5, 1.2, 0.1, 1.3])
     max_scale = 1.5
@@ -315,7 +362,9 @@ def test_grid_refinement():
         max_dl_list = np.random.random(num_intervals)
         len_interval_list = np.random.random(num_intervals) * 10
         too_short_ind = len_interval_list < max_dl_list
-        len_interval_list[too_short_ind] = max_dl_list[too_short_ind] * (1 + np.random.random(1)[0])
+        len_interval_list[too_short_ind] = max_dl_list[too_short_ind] * (
+            1 + np.random.random(1)[0]
+        )
         max_scale = 1.1
         is_periodic = True
         dl_list = MESHER.make_grid_multiple_intervals(
@@ -340,22 +389,26 @@ BOX1 = td.Structure(
 )
 # covers BOX1 along x and y but not z, smaller permittivity
 BOX2 = td.Structure(
-    geometry=td.Box(center=(0, 0, 0), size=(200, 200, 1)), medium=td.Medium(permittivity=4)
+    geometry=td.Box(center=(0, 0, 0), size=(200, 200, 1)),
+    medium=td.Medium(permittivity=4),
 )
 # covers BOX1 along x only, smaller permittivity
 BOX3 = td.Structure(
-    geometry=td.Box(center=(0, 1.5, 0), size=(200, 4, 1)), medium=td.Medium(permittivity=4)
+    geometry=td.Box(center=(0, 1.5, 0), size=(200, 4, 1)),
+    medium=td.Medium(permittivity=4),
 )
 # fully covers one edge of BOX1
 BOX4 = td.Structure(
-    geometry=td.Box(center=(0, 1.01, 0), size=(200, 0.2, 2)), medium=td.Medium(permittivity=2)
+    geometry=td.Box(center=(0, 1.01, 0), size=(200, 0.2, 2)),
+    medium=td.Medium(permittivity=2),
 )
 # box made out of gold
 GOLD = td.material_library["Au"]["JohnsonChristy1972"]
 BOX5 = td.Structure(geometry=td.Box(center=(0, 0, 0), size=(1, 1, 0.1)), medium=GOLD)
 # fully covers BOX5, regular dielectric
 BOX6 = td.Structure(
-    geometry=td.Box(center=(0, 0, 0), size=(1, 1, 0.2)), medium=td.Medium(permittivity=2)
+    geometry=td.Box(center=(0, 0, 0), size=(1, 1, 0.2)),
+    medium=td.Medium(permittivity=2),
 )
 
 
@@ -548,7 +601,9 @@ def test_mesh_multiple_direct_override_and_global_min():
     )
 
     override_enforce2 = td.MeshOverrideStructure(
-        geometry=td.Box(center=(0, -1, 0), size=(0.3, 0.3, 1)), dl=[0.15] * 3, enforce=True
+        geometry=td.Box(center=(0, -1, 0), size=(0.3, 0.3, 1)),
+        dl=[0.15] * 3,
+        enforce=True,
     )
 
     override_default = td.MeshOverrideStructure(
@@ -560,7 +615,11 @@ def test_mesh_multiple_direct_override_and_global_min():
         size=(3, 3, 3),
         grid_spec=td.GridSpec.auto(
             wavelength=WAVELENGTH,
-            override_structures=[override_enforce1, override_default, override_enforce2],
+            override_structures=[
+                override_enforce1,
+                override_default,
+                override_enforce2,
+            ],
         ),
         run_time=1e-13,
         structures=[BOX1],
@@ -575,7 +634,11 @@ def test_mesh_multiple_direct_override_and_global_min():
         size=(3, 3, 3),
         grid_spec=td.GridSpec.auto(
             wavelength=WAVELENGTH,
-            override_structures=[override_enforce1, override_default, override_enforce2],
+            override_structures=[
+                override_enforce1,
+                override_default,
+                override_enforce2,
+            ],
             dl_min=0.1,
         ),
         run_time=1e-13,
@@ -589,7 +652,9 @@ def test_mesh_multiple_direct_override_and_global_min():
 
 def test_mesh_gold_slab():
     # Test meshing of a slab with large negative permittivity
-    gold_step = WAVELENGTH / 10 / np.sqrt(np.abs(GOLD.eps_model(td.C_0 / WAVELENGTH).real))
+    gold_step = (
+        WAVELENGTH / 10 / np.sqrt(np.abs(GOLD.eps_model(td.C_0 / WAVELENGTH).real))
+    )
 
     sim = td.Simulation(
         size=(3, 3, 6),
@@ -620,7 +685,9 @@ def test_mesher_timeout():
     box_scale = 5
     sim_size = 5
     n_max = 5
-    mediums = [td.Medium(permittivity=n**2) for n in (1 + (n_max - 1) * np.random.rand(100))]
+    mediums = [
+        td.Medium(permittivity=n**2) for n in (1 + (n_max - 1) * np.random.rand(100))
+    ]
 
     boxes = []
     for i in range(num_boxes):
@@ -652,7 +719,6 @@ def test_mesher_timeout():
 
 
 def test_shapely_strtree_warnings(caplog):
-
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         m = GradedMesher().parse_structures(

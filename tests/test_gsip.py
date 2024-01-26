@@ -25,4 +25,3 @@ def test_all_library_cells(tech):
 
 if __name__ == "__main__":
     test_all_library_cells(tech=GSiP.name)
-

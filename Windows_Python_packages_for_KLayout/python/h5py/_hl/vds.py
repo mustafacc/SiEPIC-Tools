@@ -23,10 +23,8 @@ from .. import h5d, h5p, h5s, h5t, h5
 from .. import version
 
 
-class VDSmap(namedtuple('VDSmap', ('vspace', 'file_name',
-                                   'dset_name', 'src_space'))):
-    '''Defines a region in a virtual dataset mapping to part of a source dataset
-    '''
+class VDSmap(namedtuple("VDSmap", ("vspace", "file_name", "dset_name", "src_space"))):
+    """Defines a region in a virtual dataset mapping to part of a source dataset"""
 
 
 vds_support = False
@@ -89,19 +87,29 @@ class VirtualSource:
         The source dataset is resizable up to this shape. Use None for
         axes you want to be unlimited.
     """
-    def __init__(self, path_or_dataset, name=None,
-                 shape=None, dtype=None, maxshape=None):
+
+    def __init__(
+        self, path_or_dataset, name=None, shape=None, dtype=None, maxshape=None
+    ):
         from .dataset import Dataset
+
         if isinstance(path_or_dataset, Dataset):
-            failed = {k: v
-                      for k, v in
-                      {'name': name, 'shape': shape,
-                       'dtype': dtype, 'maxshape': maxshape}.items()
-                      if v is not None}
+            failed = {
+                k: v
+                for k, v in {
+                    "name": name,
+                    "shape": shape,
+                    "dtype": dtype,
+                    "maxshape": maxshape,
+                }.items()
+                if v is not None
+            }
             if failed:
-                raise TypeError("If a Dataset is passed as the first argument "
-                                "then no other arguments may be passed.  You "
-                                "passed {failed}".format(failed=failed))
+                raise TypeError(
+                    "If a Dataset is passed as the first argument "
+                    "then no other arguments may be passed.  You "
+                    "passed {failed}".format(failed=failed)
+                )
             ds = path_or_dataset
             path = ds.file.filename
             name = ds.name
@@ -111,11 +119,14 @@ class VirtualSource:
         else:
             path = path_or_dataset
             if name is None:
-                raise TypeError("The name parameter is required when "
-                                "specifying a source by path")
+                raise TypeError(
+                    "The name parameter is required when " "specifying a source by path"
+                )
             if shape is None:
-                raise TypeError("The shape parameter is required when "
-                                "specifying a source by path")
+                raise TypeError(
+                    "The shape parameter is required when "
+                    "specifying a source by path"
+                )
             elif isinstance(shape, int):
                 shape = (shape,)
 
@@ -129,8 +140,9 @@ class VirtualSource:
         if maxshape is None:
             self.maxshape = shape
         else:
-            self.maxshape = tuple([h5s.UNLIMITED if ix is None else ix
-                                   for ix in maxshape])
+            self.maxshape = tuple(
+                [h5s.UNLIMITED if ix is None else ix for ix in maxshape]
+            )
         self.sel = SimpleSelection(shape)
 
     @property
@@ -142,6 +154,7 @@ class VirtualSource:
         tmp.sel = select(self.shape, key, dataset=None)
         _convert_space_for_key(tmp.sel.id, key)
         return tmp
+
 
 class VirtualLayout:
     """Object for building a virtual dataset.
@@ -165,6 +178,7 @@ class VirtualLayout:
         data in the same file will be stored with filename '.', allowing the
         file to be renamed later.
     """
+
     def __init__(self, shape, dtype, maxshape=None, filename=None):
         self.shape = (shape,) if isinstance(shape, int) else shape
         self.dtype = dtype
@@ -179,7 +193,7 @@ class VirtualLayout:
         src_filename = self._source_file_name(source.path, self._filename)
 
         self.dcpl.set_virtual(
-            sel.id, src_filename, source.name.encode('utf-8'), source.sel.id
+            sel.id, src_filename, source.name.encode("utf-8"), source.sel.id
         )
         if self._filename is None:
             self._src_filenames.add(src_filename)
@@ -191,7 +205,7 @@ class VirtualLayout:
             # use relative path if the source dataset is in the same
             # file, in order to keep the virtual dataset valid in case
             # the file is renamed.
-            return b'.'
+            return b"."
         return filename_encode(src_filename)
 
     def _get_dcpl(self, dst_filename):
@@ -218,7 +232,7 @@ class VirtualLayout:
                 new_dcpl.set_virtual(
                     self.dcpl.get_virtual_vspace(i),
                     self._source_file_name(src_filename, dst_filename),
-                    self.dcpl.get_virtual_dsetname(i).encode('utf-8'),
+                    self.dcpl.get_virtual_dsetname(i).encode("utf-8"),
                     self.dcpl.get_virtual_srcspace(i),
                 )
             return new_dcpl
@@ -226,7 +240,7 @@ class VirtualLayout:
             return self.dcpl  # Mappings are all from other files
 
     def make_dataset(self, parent, name, fillvalue=None):
-        """ Return a new low-level dataset identifier for a virtual dataset """
+        """Return a new low-level dataset identifier for a virtual dataset"""
         dcpl = self._get_dcpl(parent.file.filename)
 
         if fillvalue is not None:
@@ -245,5 +259,4 @@ class VirtualLayout:
             dtype = np.dtype(self.dtype)
             tid = h5t.py_create(dtype, logical=1)
 
-        return h5d.create(parent.id, name=name, tid=tid, space=virt_dspace,
-                          dcpl=dcpl)
+        return h5d.create(parent.id, name=name, tid=tid, space=virt_dspace, dcpl=dcpl)

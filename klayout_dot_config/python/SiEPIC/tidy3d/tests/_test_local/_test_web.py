@@ -33,13 +33,17 @@ class Test(TestCase):
         os.environ["TIDY3D_USER"] = "mytestuser"
         os.environ["TIDY3D_PASS"] = "mytestpass"
         get_credentials()
-        set_authentication_config.assert_called_with("mytestuser", encode_password("mytestpass"))
+        set_authentication_config.assert_called_with(
+            "mytestuser", encode_password("mytestpass")
+        )
 
 
 @clear_tmp
 def test_webapi_0_run():
     """test complete run"""
-    sim_data = web.run(simulation=sim_original, task_name="test_webapi", path=PATH_SIM_DATA)
+    sim_data = web.run(
+        simulation=sim_original, task_name="test_webapi", path=PATH_SIM_DATA
+    )
 
 
 def test_webapi_1_upload():
@@ -142,7 +146,9 @@ def _get_gloabl_job():
 @clear_tmp
 def test_job_0_run():
     """test complete run"""
-    job = web.Job(simulation=sim_original, task_name="test_job", callback_url=CALLBACK_URL)
+    job = web.Job(
+        simulation=sim_original, task_name="test_job", callback_url=CALLBACK_URL
+    )
     job.run(path=PATH_SIM_DATA)
 
 

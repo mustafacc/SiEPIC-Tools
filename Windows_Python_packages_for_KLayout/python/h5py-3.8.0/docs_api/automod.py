@@ -1,4 +1,3 @@
-
 """
     Requires patched version of autodoc.py
     http://bugs.python.org/issue3422
@@ -10,9 +9,10 @@ from functools import partial
 
 role_expr = re.compile(r"(:.+:(?:`.+`)?)")
 
+
 def safe_replace(istr, expr, rpl):
-    """ Perform a role-safe replacement of all occurrences of "expr", using
-        the callable "rpl".
+    """Perform a role-safe replacement of all occurrences of "expr", using
+    the callable "rpl".
     """
     outparts = []
     for part in role_expr.split(istr):
@@ -34,30 +34,32 @@ class_base = r"""
 )
 """
 
-class_exprs = { "ObjectID": "h5py.h5.ObjectID",
-                "GroupID": "h5py.h5g.GroupID",
-                "FileID": "h5py.h5f.FileID",
-                "DatasetID": "h5py.h5d.DatasetID",
-                "TypeID": "h5py.h5t.TypeID",
-                "[Dd]ataset creation property list": "h5py.h5p.PropDCID",
-                "[Dd]ataset transfer property list": "h5py.h5p.PropDXID",
-                "[Ff]ile creation property list": "h5py.h5p.PropFCID",
-                "[Ff]ile access property list": "h5py.h5p.PropFAID",
-                "[Ll]ink access property list": "h5py.h5p.PropLAID",
-                "[Ll]ink creation property list": "h5py.h5p.PropLCID",
-                "[Gg]roup creation property list": "h5py.h5p.PropGCID"}
+class_exprs = {
+    "ObjectID": "h5py.h5.ObjectID",
+    "GroupID": "h5py.h5g.GroupID",
+    "FileID": "h5py.h5f.FileID",
+    "DatasetID": "h5py.h5d.DatasetID",
+    "TypeID": "h5py.h5t.TypeID",
+    "[Dd]ataset creation property list": "h5py.h5p.PropDCID",
+    "[Dd]ataset transfer property list": "h5py.h5p.PropDXID",
+    "[Ff]ile creation property list": "h5py.h5p.PropFCID",
+    "[Ff]ile access property list": "h5py.h5p.PropFAID",
+    "[Ll]ink access property list": "h5py.h5p.PropLAID",
+    "[Ll]ink creation property list": "h5py.h5p.PropLCID",
+    "[Gg]roup creation property list": "h5py.h5p.PropGCID",
+}
 
 
 class_exprs = dict(
-    (re.compile(class_base % x.replace(" ",r"\s"), re.VERBOSE), y) \
-    for x, y in class_exprs.items() )
+    (re.compile(class_base % x.replace(" ", r"\s"), re.VERBOSE), y)
+    for x, y in class_exprs.items()
+)
 
 
 def replace_class(istr):
-
     def rpl(target, match):
-        pre, name, post = match.group('pre', 'name', 'post')
-        return '%s:class:`%s <%s>`%s' % (pre, name, target, post)
+        pre, name, post = match.group("pre", "name", "post")
+        return "%s:class:`%s <%s>`%s" % (pre, name, target, post)
 
     for expr, target in class_exprs.items():
         rpl2 = partial(rpl, target)
@@ -65,18 +67,40 @@ def replace_class(istr):
 
     return istr
 
+
 # === Replace constant and category expressions ===============================
 
 # e.g. h5f.OBJ_ALL -> :data:`h5f.OBJ_ALL <h5py.h5f.OBJ_ALL>`
 # and  h5f.OBJ*    -> :ref:`h5f.OBJ* <ref.h5f.OBJ>`
 
-const_exclude = ['HDF5', 'API', 'H5', 'H5A', 'H5D', 'H5F', 'H5P', 'H5Z', 'INT',
-                 'UINT', 'STRING', 'LONG', 'PHIL', 'GIL', 'TUPLE', 'LIST',
-                 'FORTRAN', 'BOOL', 'NULL', 'NOT', 'SZIP']
+const_exclude = [
+    "HDF5",
+    "API",
+    "H5",
+    "H5A",
+    "H5D",
+    "H5F",
+    "H5P",
+    "H5Z",
+    "INT",
+    "UINT",
+    "STRING",
+    "LONG",
+    "PHIL",
+    "GIL",
+    "TUPLE",
+    "LIST",
+    "FORTRAN",
+    "BOOL",
+    "NULL",
+    "NOT",
+    "SZIP",
+]
 const_exclude = ["%s(?:\W|$)" % x for x in const_exclude]
 const_exclude = "|".join(const_exclude)
 
-const_expr = re.compile(r"""
+const_expr = re.compile(
+    r"""
 (?P<pre>
   (?:^|\s+)                   # Must be preceded by whitespace or string start
   \W?                         # May have punctuation ( (CONST) or "CONST" )
@@ -89,36 +113,40 @@ const_expr = re.compile(r"""
   \W?                         # May have trailing punctuation
   (?:$|\s+)                   # Must be followed by whitespace or end of string
 )
-""" % const_exclude, re.VERBOSE)
+"""
+    % const_exclude,
+    re.VERBOSE,
+)
+
 
 def replace_constant(istr, current_module):
-
     def rpl(match):
-        mod, name, wild = match.group('module', 'name', 'wild')
-        pre, post = match.group('pre', 'post')
+        mod, name, wild = match.group("module", "name", "wild")
+        pre, post = match.group("pre", "post")
 
         if mod is None:
-            mod = current_module+'.'
+            mod = current_module + "."
             displayname = name
         else:
-            displayname = mod+name
+            displayname = mod + name
 
         if wild:
-            target = 'ref.'+mod+name
-            role = ':ref:'
-            displayname += '*'
+            target = "ref." + mod + name
+            role = ":ref:"
+            displayname += "*"
         else:
-            target = 'h5py.'+mod+name
-            role = ':data:'
+            target = "h5py." + mod + name
+            role = ":data:"
 
-        return '%s%s`%s <%s>`%s' % (pre, role, displayname, target, post)
+        return "%s%s`%s <%s>`%s" % (pre, role, displayname, target, post)
 
     return safe_replace(istr, const_expr, rpl)
 
 
 # === Replace literal references to modules ===================================
 
-mod_expr = re.compile(r"""
+mod_expr = re.compile(
+    r"""
 (?P<pre>
   (?:^|\s+)                 # Must be preceded by whitespace
   \W?                       # Optional opening paren/quote/whatever
@@ -129,13 +157,15 @@ mod_expr = re.compile(r"""
   \W?                       # Optional closing paren/quote/whatever
   (?:$|\s+)                 # Must be followed by whitespace
 )
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
+
 
 def replace_module(istr):
-
     def rpl(match):
-        pre, name, post = match.group('pre', 'name', 'post')
-        return '%s:mod:`%s <h5py.%s>`%s' % (pre, name, name, post)
+        pre, name, post = match.group("pre", "name", "post")
+        return "%s:mod:`%s <h5py.%s>`%s" % (pre, name, name, post)
 
     return safe_replace(istr, mod_expr, rpl)
 
@@ -144,7 +174,8 @@ def replace_module(istr):
 
 # e.g. "    + STRING path ('/default')" -> ":param STRING path: ('/default')"
 
-param_expr = re.compile(r"""
+param_expr = re.compile(
+    r"""
 ^
 \s*
 \+
@@ -165,29 +196,32 @@ param_expr = re.compile(r"""
   \)
 )?
 $
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
+
 
 def replace_param(istr):
-    """ Replace parameter lists.  Not role-safe. """
+    """Replace parameter lists.  Not role-safe."""
 
     def rpl(match):
-        desc, default = match.group('desc', 'default')
-        default = ' (%s) ' % default if default is not None else ''
-        return ':param %s:%s' % (desc, default)
+        desc, default = match.group("desc", "default")
+        default = " (%s) " % default if default is not None else ""
+        return ":param %s:%s" % (desc, default)
 
     return param_expr.sub(rpl, istr)
 
 
-
 # === Begin Sphinx extension code =============================================
 
+
 def is_callable(docstring):
-    return str(docstring).strip().startswith('(')
+    return str(docstring).strip().startswith("(")
+
 
 def setup(spx):
-
     def proc_doc(app, what, name, obj, options, lines):
-        """ Process docstrings for modules and routines """
+        """Process docstrings for modules and routines"""
 
         final_lines = lines[:]
 
@@ -202,31 +236,28 @@ def setup(spx):
                 final_lines.append(line)
 
         # Resolve class names, constants and modules
-        if hasattr(obj, 'im_class'):
+        if hasattr(obj, "im_class"):
             mod = obj.im_class.__module__
-        elif hasattr(obj, '__module__'):
+        elif hasattr(obj, "__module__"):
             mod = obj.__module__
         else:
-            mod = ".".join(name.split('.')[0:2])  # i.e. "h5py.h5z"
-        mod = mod.split('.')[1]  # i.e. 'h5z'
+            mod = ".".join(name.split(".")[0:2])  # i.e. "h5py.h5z"
+        mod = mod.split(".")[1]  # i.e. 'h5z'
 
         del lines[:]
         for line in final_lines:
-            #line = replace_param(line)
+            # line = replace_param(line)
             line = replace_constant(line, mod)
             line = replace_module(line)
             line = replace_class(line)
-            line = line.replace('**kwds', '\*\*kwds').replace('*args','\*args')
+            line = line.replace("**kwds", "\*\*kwds").replace("*args", "\*args")
             lines.append(line)
 
-
-
-
     def proc_sig(app, what, name, obj, options, signature, return_annotation):
-        """ Auto-generate function signatures from docstrings """
+        """Auto-generate function signatures from docstrings"""
 
         def getsig(docstring):
-            """ Get (sig, return) from a docstring, or None. """
+            """Get (sig, return) from a docstring, or None."""
             if not is_callable(docstring):
                 return None
 
@@ -237,16 +268,16 @@ def setup(spx):
                 lines.append(line)
             rawsig = " ".join(x.strip() for x in lines)
 
-            if '=>' in rawsig:
-                sig, ret = tuple(x.strip() for x in rawsig.split('=>'))
-            elif '->' in rawsig:
-                sig, ret = tuple(x.strip() for x in rawsig.split('->'))
+            if "=>" in rawsig:
+                sig, ret = tuple(x.strip() for x in rawsig.split("=>"))
+            elif "->" in rawsig:
+                sig, ret = tuple(x.strip() for x in rawsig.split("->"))
             else:
                 sig = rawsig
                 ret = None
 
             if sig == "()":
-                sig = "( )" # Why? Ask autodoc.
+                sig = "( )"  # Why? Ask autodoc.
 
             return (sig, ret)
 
@@ -254,5 +285,5 @@ def setup(spx):
 
         return sigtuple
 
-    spx.connect('autodoc-process-signature', proc_sig)
-    spx.connect('autodoc-process-docstring', proc_doc)
+    spx.connect("autodoc-process-signature", proc_sig)
+    spx.connect("autodoc-process-docstring", proc_doc)

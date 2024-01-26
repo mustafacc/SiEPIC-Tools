@@ -26,33 +26,31 @@ from .datatype import Datatype
 class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
 
     """
-        Allows dictionary-style access to an HDF5 object's attributes.
+    Allows dictionary-style access to an HDF5 object's attributes.
 
-        These are created exclusively by the library and are available as
-        a Python attribute at <object>.attrs
+    These are created exclusively by the library and are available as
+    a Python attribute at <object>.attrs
 
-        Like Group objects, attributes provide a minimal dictionary-
-        style interface.  Anything which can be reasonably converted to a
-        Numpy array or Numpy scalar can be stored.
+    Like Group objects, attributes provide a minimal dictionary-
+    style interface.  Anything which can be reasonably converted to a
+    Numpy array or Numpy scalar can be stored.
 
-        Attributes are automatically created on assignment with the
-        syntax <obj>.attrs[name] = value, with the HDF5 type automatically
-        deduced from the value.  Existing attributes are overwritten.
+    Attributes are automatically created on assignment with the
+    syntax <obj>.attrs[name] = value, with the HDF5 type automatically
+    deduced from the value.  Existing attributes are overwritten.
 
-        To modify an existing attribute while preserving its type, use the
-        method modify().  To specify an attribute of a particular type and
-        shape, use create().
+    To modify an existing attribute while preserving its type, use the
+    method modify().  To specify an attribute of a particular type and
+    shape, use create().
     """
 
     def __init__(self, parent):
-        """ Private constructor.
-        """
+        """Private constructor."""
         self._id = parent.id
 
     @with_phil
     def __getitem__(self, name):
-        """ Read the value of an attribute.
-        """
+        """Read the value of an attribute."""
         attr = h5a.open(self._id, self._e(name))
         shape = attr.shape
 
@@ -71,31 +69,30 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
         # attr.shape == (5,) and attr.dtype == '(3,)f'. Then:
         if dtype.subdtype is not None:
             subdtype, subshape = dtype.subdtype
-            shape = attr.shape + subshape   # (5, 3)
-            dtype = subdtype                # 'f'
+            shape = attr.shape + subshape  # (5, 3)
+            dtype = subdtype  # 'f'
 
-        arr = numpy.zeros(shape, dtype=dtype, order='C')
+        arr = numpy.zeros(shape, dtype=dtype, order="C")
         attr.read(arr, mtype=htype)
 
         string_info = h5t.check_string_dtype(dtype)
         if string_info and (string_info.length is None):
             # Vlen strings: convert bytes to Python str
-            arr = numpy.array([
-                b.decode('utf-8', 'surrogateescape') for b in arr.flat
-            ], dtype=dtype).reshape(arr.shape)
+            arr = numpy.array(
+                [b.decode("utf-8", "surrogateescape") for b in arr.flat], dtype=dtype
+            ).reshape(arr.shape)
 
         if arr.ndim == 0:
             return arr[()]
         return arr
 
     def get_id(self, name):
-        """Get a low-level AttrID object for the named attribute.
-        """
+        """Get a low-level AttrID object for the named attribute."""
         return h5a.open(self._id, self._e(name))
 
     @with_phil
     def __setitem__(self, name, value):
-        """ Set a new attribute, overwriting any existing attribute.
+        """Set a new attribute, overwriting any existing attribute.
 
         The type and shape of the attribute are determined from the data.  To
         use a specific type or shape, or to preserve the type of an attribute,
@@ -105,11 +102,11 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
 
     @with_phil
     def __delitem__(self, name):
-        """ Delete an attribute (which must already exist). """
+        """Delete an attribute (which must already exist)."""
         h5a.delete(self._id, self._e(name))
 
     def create(self, name, data, shape=None, dtype=None):
-        """ Create a new attribute, overwriting any existing attribute.
+        """Create a new attribute, overwriting any existing attribute.
 
         name
             Name of the new attribute (required)
@@ -134,8 +131,8 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
             elif isinstance(shape, int):
                 shape = (shape,)
 
-            use_htype = None    # If a committed type is given, we must use it
-                                # in the call to h5a.create.
+            use_htype = None  # If a committed type is given, we must use it
+            # in the call to h5a.create.
 
             if isinstance(dtype, Datatype):
                 use_htype = dtype.id
@@ -143,7 +140,7 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
             elif dtype is None:
                 dtype = data.dtype
             else:
-                dtype = numpy.dtype(dtype) # In case a string, e.g. 'i8' is passed
+                dtype = numpy.dtype(dtype)  # In case a string, e.g. 'i8' is passed
 
             original_dtype = dtype  # We'll need this for top-level array types
 
@@ -151,23 +148,28 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
             # fiddling around to present the data as a smaller array of
             # subarrays.
             if dtype.subdtype is not None:
-
                 subdtype, subshape = dtype.subdtype
 
                 # Make sure the subshape matches the last N axes' sizes.
-                if shape[-len(subshape):] != subshape:
-                    raise ValueError("Array dtype shape %s is incompatible with data shape %s" % (subshape, shape))
+                if shape[-len(subshape) :] != subshape:
+                    raise ValueError(
+                        "Array dtype shape %s is incompatible with data shape %s"
+                        % (subshape, shape)
+                    )
 
                 # New "advertised" shape and dtype
-                shape = shape[0:len(shape)-len(subshape)]
+                shape = shape[0 : len(shape) - len(subshape)]
                 dtype = subdtype
 
             # Not an array type; make sure to check the number of elements
             # is compatible, and reshape if needed.
             else:
-
-                if shape is not None and numpy.product(shape, dtype=numpy.ulonglong) != numpy.product(data.shape, dtype=numpy.ulonglong):
-                    raise ValueError("Shape of new attribute conflicts with shape of data")
+                if shape is not None and numpy.product(
+                    shape, dtype=numpy.ulonglong
+                ) != numpy.product(data.shape, dtype=numpy.ulonglong):
+                    raise ValueError(
+                        "Shape of new attribute conflicts with shape of data"
+                    )
 
                 if shape != data.shape:
                     data = data.reshape(shape)
@@ -179,7 +181,9 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
             # Make HDF5 datatype and dataspace for the H5A calls
             if use_htype is None:
                 htype = h5t.py_create(original_dtype, logical=True)
-                htype2 = h5t.py_create(original_dtype)  # Must be bit-for-bit representation rather than logical
+                htype2 = h5t.py_create(
+                    original_dtype
+                )  # Must be bit-for-bit representation rather than logical
             else:
                 htype = use_htype
                 htype2 = None
@@ -220,7 +224,7 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
                 attr.close()
 
     def modify(self, name, value):
-        """ Change the value of an attribute while preserving its type.
+        """Change the value of an attribute while preserving its type.
 
         Differs from __setitem__ in that if the attribute already exists, its
         type is preserved.  This can be very useful for interacting with
@@ -240,27 +244,30 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
                 # If the input data is already an array, let HDF5 do the conversion.
                 # If it's a list or similar, don't make numpy guess a dtype for it.
                 dt = None if isinstance(value, numpy.ndarray) else attr.dtype
-                value = numpy.asarray(value, order='C', dtype=dt)
+                value = numpy.asarray(value, order="C", dtype=dt)
 
                 # Allow the case of () <-> (1,)
-                if (value.shape != attr.shape) and not \
-                   (value.size == 1 and product(attr.shape) == 1):
-                    raise TypeError("Shape of data is incompatible with existing attribute")
+                if (value.shape != attr.shape) and not (
+                    value.size == 1 and product(attr.shape) == 1
+                ):
+                    raise TypeError(
+                        "Shape of data is incompatible with existing attribute"
+                    )
                 attr.write(value)
 
     @with_phil
     def __len__(self):
-        """ Number of attributes attached to the object. """
+        """Number of attributes attached to the object."""
         # I expect we will not have more than 2**32 attributes
         return h5a.get_num_attrs(self._id)
 
     def __iter__(self):
-        """ Iterate over the names of attributes. """
+        """Iterate over the names of attributes."""
         with phil:
-
             attrlist = []
+
             def iter_cb(name, *args):
-                """ Callback to gather attribute names """
+                """Callback to gather attribute names"""
                 attrlist.append(self._d(name))
 
             cpl = self._id.get_create_plist()
@@ -278,7 +285,7 @@ class AttributeManager(base.MutableMappingHDF5, base.CommonStateObject):
 
     @with_phil
     def __contains__(self, name):
-        """ Determine if an attribute exists, by name. """
+        """Determine if an attribute exists, by name."""
         return h5a.exists(self._id, self._e(name))
 
     @with_phil

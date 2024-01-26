@@ -8,16 +8,13 @@ import struct
 
 
 class PersistTestCase(unittest.TestCase):
-
     def test_pickle(self):
-
         p = Point(0.0, 0.0)
         data = pickle.dumps(p)
         q = pickle.loads(data)
         assert q.equals(p)
 
     def test_wkb(self):
-
         p = Point(0.0, 0.0)
         wkb_big_endian = wkb.dumps(p, big_endian=True)
         wkb_little_endian = wkb.dumps(p, big_endian=False)
@@ -27,7 +24,6 @@ class PersistTestCase(unittest.TestCase):
         assert p.equals(wkb.loads(wkb_little_endian))
 
     def test_wkb_dumps_endianness(self):
-
         p = Point(0.5, 2.0)
         wkb_big_endian = wkb.dumps(p, big_endian=True)
         wkb_little_endian = wkb.dumps(p, big_endian=False)
@@ -39,13 +35,13 @@ class PersistTestCase(unittest.TestCase):
         assert wkb_big_endian[0] == 0
         assert wkb_little_endian[0] == 1
         # Check that the doubles (0.5, 2.0) are in correct byte order
-        double_size = struct.calcsize('d')
-        assert wkb_big_endian[(-2 * double_size):] == struct.pack('>2d', p.x, p.y)
-        assert wkb_little_endian[(-2 * double_size):] == struct.pack('<2d', p.x, p.y)
+        double_size = struct.calcsize("d")
+        assert wkb_big_endian[(-2 * double_size) :] == struct.pack(">2d", p.x, p.y)
+        assert wkb_little_endian[(-2 * double_size) :] == struct.pack("<2d", p.x, p.y)
 
     def test_wkt(self):
         p = Point(0.0, 0.0)
         text = wkt.dumps(p)
-        assert text.startswith('POINT')
+        assert text.startswith("POINT")
         pt = wkt.loads(text)
         assert pt.equals(p)

@@ -14,13 +14,13 @@ import os
 
 # Newer packaging standards may recommend removing the current dir from the
 # path, add it back if needed.
-if '' not in sys.path:
-    sys.path.insert(0, '')
+if "" not in sys.path:
+    sys.path.insert(0, "")
 
 import setup_build, setup_configure
 
 
-VERSION = '3.8.0'
+VERSION = "3.8.0"
 
 
 # these are required to use h5py
@@ -43,36 +43,38 @@ RUN_REQUIRES = [
 SETUP_REQUIRES = []
 
 if setup_configure.mpi_enabled():
-    RUN_REQUIRES.append('mpi4py >=3.0.2')
+    RUN_REQUIRES.append("mpi4py >=3.0.2")
     SETUP_REQUIRES.append("mpi4py ==3.0.2; python_version<'3.8'")
     SETUP_REQUIRES.append("mpi4py ==3.0.3; python_version=='3.8.*'")
-    SETUP_REQUIRES.append("mpi4py ==3.1.0; python_version=='3.9.*' or python_version=='3.10.*'")
+    SETUP_REQUIRES.append(
+        "mpi4py ==3.1.0; python_version=='3.9.*' or python_version=='3.10.*'"
+    )
     SETUP_REQUIRES.append("mpi4py ==3.1.4; python_version>='3.11'")
 
 # Set the environment variable H5PY_SETUP_REQUIRES=0 if we need to skip
 # setup_requires for any reason.
-if os.environ.get('H5PY_SETUP_REQUIRES', '1') == '0':
+if os.environ.get("H5PY_SETUP_REQUIRES", "1") == "0":
     SETUP_REQUIRES = []
 
 # --- Custom Distutils commands -----------------------------------------------
 
-CMDCLASS = {'build_ext': setup_build.h5py_build_ext}
+CMDCLASS = {"build_ext": setup_build.h5py_build_ext}
 
 
 # --- Dynamic metadata for setuptools -----------------------------------------
 
-package_data = {'h5py': [], "h5py.tests.data_files": ["*.h5"]}
-if os.name == 'nt':
-    package_data['h5py'].append('*.dll')
+package_data = {"h5py": [], "h5py.tests.data_files": ["*.h5"]}
+if os.name == "nt":
+    package_data["h5py"].append("*.dll")
 
 setup(
-  name = 'h5py',
-  version = VERSION,
-  package_data = package_data,
-  ext_modules = [Extension('h5py.x',['x.c'])],  # To trick build into running build_ext
-  install_requires = RUN_REQUIRES,
-  setup_requires = SETUP_REQUIRES,
-  cmdclass = CMDCLASS,
+    name="h5py",
+    version=VERSION,
+    package_data=package_data,
+    ext_modules=[Extension("h5py.x", ["x.c"])],  # To trick build into running build_ext
+    install_requires=RUN_REQUIRES,
+    setup_requires=SETUP_REQUIRES,
+    cmdclass=CMDCLASS,
 )
 
 # see pyproject.toml for static metadata

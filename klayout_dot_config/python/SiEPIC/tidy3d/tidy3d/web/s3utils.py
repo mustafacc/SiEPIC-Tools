@@ -142,7 +142,9 @@ def get_s3_sts_token(resource_id: str, file_name: str) -> _S3STSToken:
     return _s3_sts_tokens[cache_key]
 
 
-def upload_string(resource_id: str, content: str, remote_filename: str, verbose: bool = True):
+def upload_string(
+    resource_id: str, content: str, remote_filename: str, verbose: bool = True
+):
     """
     upload a string to a file on S3
     @param resource_id: the resource id, e.g. task id
@@ -165,7 +167,9 @@ def upload_string(resource_id: str, content: str, remote_filename: str, verbose:
     if verbose:
         with _get_progress(_S3Action.UPLOADING) as progress:
             total_size = len(content)
-            task_id = progress.add_task("upload", filename=remote_filename, total=total_size)
+            task_id = progress.add_task(
+                "upload", filename=remote_filename, total=total_size
+            )
 
             def _callback(bytes_in_chunk):
                 progress.update(task_id, advance=bytes_in_chunk)
@@ -177,7 +181,9 @@ def upload_string(resource_id: str, content: str, remote_filename: str, verbose:
         _upload(lambda bytes_in_chunk: None)
 
 
-def upload_file(resource_id: str, path: str, remote_filename: str, verbose: bool = True):
+def upload_file(
+    resource_id: str, path: str, remote_filename: str, verbose: bool = True
+):
     """
     upload file to S3
     @param resource_id: the resource id, e.g. task id
@@ -201,7 +207,9 @@ def upload_file(resource_id: str, path: str, remote_filename: str, verbose: bool
     if verbose:
         with _get_progress(_S3Action.UPLOADING) as progress:
             total_size = os.path.getsize(path)
-            task_id = progress.add_task("upload", filename=remote_filename, total=total_size)
+            task_id = progress.add_task(
+                "upload", filename=remote_filename, total=total_size
+            )
 
             def _callback(bytes_in_chunk):
                 progress.update(task_id, advance=bytes_in_chunk)
@@ -236,7 +244,10 @@ def download_file(
         """Perform the download with a callback fn"""
 
         client.download_file(
-            Bucket=token.get_bucket(), Filename=to_file, Key=token.get_s3_key(), Callback=_callback
+            Bucket=token.get_bucket(),
+            Filename=to_file,
+            Key=token.get_s3_key(),
+            Callback=_callback,
         )
 
     if verbose:

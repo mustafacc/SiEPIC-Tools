@@ -1,4 +1,4 @@
-#+
+# +
 #
 # This file is part of h5py, a low-level Python interface to the HDF5 library.
 #
@@ -9,7 +9,7 @@
 # http://h5py.org
 # License: BSD  (See LICENSE.txt for full license)
 #
-#-
+# -
 
 # pylint: disable=eval-used,protected-access
 
@@ -56,13 +56,13 @@ re_object_match = re.compile(r"(?:.*\=)?(.+?)(?:\[)")
 
 
 def _retrieve_obj(name, context):
-    """ Filter function for completion. """
+    """Filter function for completion."""
 
     # we don't want to call any functions, but I couldn't find a robust regex
     # that filtered them without unintended side effects. So keys containing
     # "(" will not complete.
 
-    if '(' in name:
+    if "(" in name:
         raise ValueError()
 
     return eval(name, context.user_ns)
@@ -90,7 +90,7 @@ def h5py_item_completer(context, command):
 
     items = list(items)
 
-    return [i for i in items if i[:len(item)] == item]
+    return [i for i in items if i[: len(item)] == item]
 
 
 def h5py_attr_completer(context, command):
@@ -117,18 +117,18 @@ def h5py_attr_completer(context, command):
         omit__names = 0
 
     if omit__names == 1:
-        attrs = [a for a in attrs if not a.startswith('__')]
+        attrs = [a for a in attrs if not a.startswith("__")]
     elif omit__names == 2:
-        attrs = [a for a in attrs if not a.startswith('_')]
+        attrs = [a for a in attrs if not a.startswith("_")]
 
-    return ["%s.%s" % (base, a) for a in attrs if a[:len(attr)] == attr]
+    return ["%s.%s" % (base, a) for a in attrs if a[: len(attr)] == attr]
 
 
 def h5py_completer(self, event):
-    """ Completer function to be loaded into IPython """
+    """Completer function to be loaded into IPython"""
     base = re_object_match.split(event.line)[1]
 
-    if not isinstance(self._ofind(base).get('obj'), (AttributeManager, HLObject)):
+    if not isinstance(self._ofind(base).get("obj"), (AttributeManager, HLObject)):
         raise TryNext
 
     try:
@@ -145,7 +145,7 @@ def h5py_completer(self, event):
 
 
 def load_ipython_extension(ip=None):
-    """ Load completer function into IPython """
+    """Load completer function into IPython"""
     if ip is None:
         ip = get_ipython()
-    ip.set_hook('complete_command', h5py_completer, re_key=r"(?:.*\=)?(.+?)\[")
+    ip.set_hook("complete_command", h5py_completer, re_key=r"(?:.*\=)?(.+?)\[")

@@ -246,7 +246,6 @@ def test_polygon_from_generator():
 
 class TestPolygon:
     def test_linearring(self):
-
         # Initialization
         # Linear rings won't usually be created by users, but by polygons
         coords = ((0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0))
@@ -313,7 +312,6 @@ class TestPolygon:
         assert r_null.length == 0.0
 
     def test_dimensions(self):
-
         # Background: see http://trac.gispython.org/lab/ticket/168
         # http://lists.gispython.org/pipermail/community/2008-August/001859.html
 
@@ -343,7 +341,6 @@ class TestPolygon:
         )
 
     def test_attribute_chains(self):
-
         # Attribute Chaining
         # See also ticket #151.
         p = Polygon([(0.0, 0.0), (0.0, 1.0), (-1.0, 1.0), (-1.0, 0.0)])

@@ -23,21 +23,22 @@ from .dataset import Dataset
 class DimensionProxy(base.CommonStateObject):
 
     """
-        Represents an HDF5 "dimension".
+    Represents an HDF5 "dimension".
     """
 
     @property
     @with_phil
     def label(self):
-        """ Get or set the dimension scale label """
-        #return h5ds.get_label(self._id, self._dimension)
+        """Get or set the dimension scale label"""
+        # return h5ds.get_label(self._id, self._dimension)
         # Produces a segfault for a non-existent label (Fixed in hdf5-1.8.8).
         # Here is a workaround:
         try:
             dset = Dataset(self._id)
-            return dset.attrs['DIMENSION_LABELS'][self._dimension]
+            return dset.attrs["DIMENSION_LABELS"][self._dimension]
         except (KeyError, IndexError):
-            return ''
+            return ""
+
     @label.setter
     @with_phil
     def label(self, val):
@@ -68,15 +69,15 @@ class DimensionProxy(base.CommonStateObject):
 
     @with_phil
     def __getitem__(self, item):
-
         if isinstance(item, int):
             scales = []
             h5ds.iterate(self._id, self._dimension, scales.append, 0)
             return Dataset(scales[item])
 
         else:
+
             def f(dsid):
-                """ Iterate over scales to find a matching name """
+                """Iterate over scales to find a matching name"""
                 if h5ds.get_scale_name(dsid) == self._e(item):
                     return dsid
 
@@ -86,7 +87,7 @@ class DimensionProxy(base.CommonStateObject):
             return Dataset(res)
 
     def attach_scale(self, dset):
-        """ Attach a scale to this dimension.
+        """Attach a scale to this dimension.
 
         Provide the Dataset of the scale you would like to attach.
         """
@@ -94,7 +95,7 @@ class DimensionProxy(base.CommonStateObject):
             h5ds.attach_scale(self._id, dset.id, self._dimension)
 
     def detach_scale(self, dset):
-        """ Remove a scale from this dimension.
+        """Remove a scale from this dimension.
 
         Provide the Dataset of the scale you would like to remove.
         """
@@ -102,7 +103,7 @@ class DimensionProxy(base.CommonStateObject):
             h5ds.detach_scale(self._id, dset.id, self._dimension)
 
     def items(self):
-        """ Get a list of (name, Dataset) pairs with all scales on this
+        """Get a list of (name, Dataset) pairs with all scales on this
         dimension.
         """
         with phil:
@@ -113,18 +114,15 @@ class DimensionProxy(base.CommonStateObject):
             if len(self) > 0:
                 h5ds.iterate(self._id, self._dimension, scales.append, 0)
 
-            return [
-                (self._d(h5ds.get_scale_name(x)), Dataset(x))
-                for x in scales
-                ]
+            return [(self._d(h5ds.get_scale_name(x)), Dataset(x)) for x in scales]
 
     def keys(self):
-        """ Get a list of names for the scales on this dimension. """
+        """Get a list of names for the scales on this dimension."""
         with phil:
             return [key for (key, _) in self.items()]
 
     def values(self):
-        """ Get a list of Dataset for scales on this dimension. """
+        """Get a list of Dataset for scales on this dimension."""
         with phil:
             return [val for (_, val) in self.items()]
 
@@ -132,41 +130,42 @@ class DimensionProxy(base.CommonStateObject):
     def __repr__(self):
         if not self._id:
             return "<Dimension of closed HDF5 dataset>"
-        return ('<"%s" dimension %d of HDF5 dataset at %s>'
-               % (self.label, self._dimension, id(self._id)))
+        return '<"%s" dimension %d of HDF5 dataset at %s>' % (
+            self.label,
+            self._dimension,
+            id(self._id),
+        )
 
 
 class DimensionManager(base.CommonStateObject):
 
     """
-        Represents a collection of dimension associated with a dataset.
+    Represents a collection of dimension associated with a dataset.
 
-        Like AttributeManager, an instance of this class is returned when
-        accessing the ".dims" property on a Dataset.
+    Like AttributeManager, an instance of this class is returned when
+    accessing the ".dims" property on a Dataset.
     """
 
     @with_phil
     def __init__(self, parent):
-        """ Private constructor.
-        """
+        """Private constructor."""
         self._id = parent.id
 
     @with_phil
     def __getitem__(self, index):
-        """ Return a Dimension object
-        """
+        """Return a Dimension object"""
         if index > len(self) - 1:
-            raise IndexError('Index out of range')
+            raise IndexError("Index out of range")
         return DimensionProxy(self._id, index)
 
     @with_phil
     def __len__(self):
-        """ Number of dimensions associated with the dataset. """
+        """Number of dimensions associated with the dataset."""
         return self._id.rank
 
     @with_phil
     def __iter__(self):
-        """ Iterate over the dimensions. """
+        """Iterate over the dimensions."""
         for i in range(len(self)):
             yield self[i]
 
@@ -176,13 +175,15 @@ class DimensionManager(base.CommonStateObject):
             return "<Dimensions of closed HDF5 dataset>"
         return "<Dimensions of HDF5 object at %s>" % id(self._id)
 
-    def create_scale(self, dset, name=''):
-        """ Create a new dimension, from an initial scale.
+    def create_scale(self, dset, name=""):
+        """Create a new dimension, from an initial scale.
 
         Provide the dataset and a name for the scale.
         """
-        warnings.warn("other_ds.dims.create_scale(ds, name) is deprecated. "
-                      "Use ds.make_scale(name) instead.",
-                      H5pyDeprecationWarning, stacklevel=2,
-                     )
+        warnings.warn(
+            "other_ds.dims.create_scale(ds, name) is deprecated. "
+            "Use ds.make_scale(name) instead.",
+            H5pyDeprecationWarning,
+            stacklevel=2,
+        )
         dset.make_scale(name)

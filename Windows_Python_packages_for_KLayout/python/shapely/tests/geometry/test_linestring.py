@@ -132,7 +132,6 @@ def test_from_single_coordinate():
 
 class TestLineString:
     def test_linestring(self):
-
         # From coordinate tuples
         line = LineString([(1.0, 2.0), (3.0, 4.0)])
         assert len(line.coords) == 2

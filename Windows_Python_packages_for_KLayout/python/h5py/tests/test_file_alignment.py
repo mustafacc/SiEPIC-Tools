@@ -13,9 +13,10 @@ def dataset_name(i):
 
 class TestFileAlignment(TestCase):
     """
-        Ensure that setting the file alignment has the desired effect
-        in the internal structure.
+    Ensure that setting the file alignment has the desired effect
+    in the internal structure.
     """
+
     def test_no_alignment_set(self):
         fname = self.mktemp()
         # 881 is a prime number, so hopefully this help randomize the alignment
@@ -24,7 +25,7 @@ class TestFileAlignment(TestCase):
         # While we don't want the data to be aligned, it ends up aligned...
         shape = (881,)
 
-        with h5py.File(fname, 'w') as h5file:
+        with h5py.File(fname, "w") as h5file:
             # Create up to 1000 datasets
             # At least one of them should be misaligned.
             # While this isn't perfect, it seems that there
@@ -32,8 +33,7 @@ class TestFileAlignment(TestCase):
             # is aligned. Therefore, during correct operation, this test is
             # expected to finish quickly
             for i in range(1000):
-                dataset = h5file.create_dataset(
-                    dataset_name(i), shape, dtype='uint8')
+                dataset = h5file.create_dataset(dataset_name(i), shape, dtype="uint8")
                 # Assign data so that the dataset is instantiated in
                 # the file
                 dataset[...] = i
@@ -55,17 +55,21 @@ class TestFileAlignment(TestCase):
             (1001,),  # one above the threshold
         ]:
             fname = self.mktemp()
-            with h5py.File(fname, 'w',
-                           alignment_threshold=alignment_threshold,
-                           alignment_interval=alignment_interval) as h5file:
+            with h5py.File(
+                fname,
+                "w",
+                alignment_threshold=alignment_threshold,
+                alignment_interval=alignment_interval,
+            ) as h5file:
                 # Create up to 1000 datasets
                 # They are all expected to be aligned
                 for i in range(1000):
                     dataset = h5file.create_dataset(
-                        dataset_name(i), shape, dtype='uint8')
+                        dataset_name(i), shape, dtype="uint8"
+                    )
                     # Assign data so that the dataset is instantiated in
                     # the file
-                    dataset[...] = (i % 256)  # Truncate to uint8
+                    dataset[...] = i % 256  # Truncate to uint8
                     assert is_aligned(dataset, offset=alignment_interval)
 
     def test_alignment_set_below_threshold(self):
@@ -79,9 +83,12 @@ class TestFileAlignment(TestCase):
             (999,),  # Exactly one below the threshold
         ]:
             fname = self.mktemp()
-            with h5py.File(fname, 'w',
-                           alignment_threshold=alignment_threshold,
-                           alignment_interval=alignment_interval) as h5file:
+            with h5py.File(
+                fname,
+                "w",
+                alignment_threshold=alignment_threshold,
+                alignment_interval=alignment_interval,
+            ) as h5file:
                 # Create up to 1000 datasets
                 # At least one of them should be misaligned.
                 # While this isn't perfect, it seems that there
@@ -90,7 +97,8 @@ class TestFileAlignment(TestCase):
                 # test is expected to finish quickly
                 for i in range(1000):
                     dataset = h5file.create_dataset(
-                        dataset_name(i), shape, dtype='uint8')
+                        dataset_name(i), shape, dtype="uint8"
+                    )
                     # Assign data so that the dataset is instantiated in
                     # the file
                     dataset[...] = i
@@ -100,4 +108,5 @@ class TestFileAlignment(TestCase):
                 else:
                     raise RuntimeError(
                         "Data was all found to be aligned to "
-                        f"{alignment_interval}. This is highly unlikely.")
+                        f"{alignment_interval}. This is highly unlikely."
+                    )

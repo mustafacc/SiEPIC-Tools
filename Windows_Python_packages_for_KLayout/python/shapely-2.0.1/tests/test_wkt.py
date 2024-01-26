@@ -58,5 +58,4 @@ def test_dumps_loads_null_geometry(empty_geometry):
 
 
 def test_dumps_precision(some_point):
-    assert dumps(some_point, rounding_precision=4) == \
-           f"POINT ({pi:.4f} {-pi:.4f})"
+    assert dumps(some_point, rounding_precision=4) == f"POINT ({pi:.4f} {-pi:.4f})"

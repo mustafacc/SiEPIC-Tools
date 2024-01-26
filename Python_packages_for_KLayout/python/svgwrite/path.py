@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Author:  mozman
 # Purpose: svg path element
 # Created: 08.09.2010
@@ -11,11 +11,12 @@ from svgwrite.utils import to_unicode
 
 
 class Path(BaseElement, Transform, Presentation, Markers):
-    """ The <path> element represent the outline of a shape which can be filled,
+    """The <path> element represent the outline of a shape which can be filled,
     stroked, used as a clipping path, or any combination of the three.
 
     """
-    elementname = 'path'
+
+    elementname = "path"
 
     def __init__(self, d=None, **extra):
         """
@@ -28,10 +29,12 @@ class Path(BaseElement, Transform, Presentation, Markers):
         self.commands = []
         self.push(d)
         if self.debug:
-            self.validator.check_all_svg_attribute_values(self.elementname, self.attribs)
+            self.validator.check_all_svg_attribute_values(
+                self.elementname, self.attribs
+            )
 
     def push(self, *elements):
-        """ Push commands and coordinates onto the command stack.
+        """Push commands and coordinates onto the command stack.
 
         :param `iterable` elements: *coordinates*, *length* and *commands*
 
@@ -39,13 +42,15 @@ class Path(BaseElement, Transform, Presentation, Markers):
         self.commands.extend(elements)
 
     @staticmethod
-    def arc_flags(large_arc=True, angle_dir='+'):
+    def arc_flags(large_arc=True, angle_dir="+"):
         large_arc_flag = int(large_arc)
-        sweep_flag = {'+': 1, '-': 0}[angle_dir]
+        sweep_flag = {"+": 1, "-": 0}[angle_dir]
         return "%d,%d" % (large_arc_flag, sweep_flag)
 
-    def push_arc(self, target, rotation, r, large_arc=True, angle_dir='+', absolute=False):
-        """ Helper function for the elliptical-arc command.
+    def push_arc(
+        self, target, rotation, r, large_arc=True, angle_dir="+", absolute=False
+    ):
+        """Helper function for the elliptical-arc command.
 
         see SVG-Reference: http://www.w3.org/TR/SVG11/paths.html#PathData
 
@@ -57,7 +62,7 @@ class Path(BaseElement, Transform, Presentation, Markers):
         :param bool absolute: indicates that target *coordinates* are absolute else they are relative to the current point
 
         """
-        self.push({True: 'A', False: 'a'}[absolute])
+        self.push({True: "A", False: "a"}[absolute])
         if isinstance(r, (float, int)):
             self.push(r, r)
         else:
@@ -67,10 +72,10 @@ class Path(BaseElement, Transform, Presentation, Markers):
         self.push(target)
 
     def get_xml(self):
-        """ Get the XML representation as `ElementTree` object.
+        """Get the XML representation as `ElementTree` object.
 
         :return: XML `ElementTree` of this object and all its subelements
 
         """
-        self.attribs['d'] = to_unicode(strlist(self.commands, ' '))
+        self.attribs["d"] = to_unicode(strlist(self.commands, " "))
         return super(Path, self).get_xml()

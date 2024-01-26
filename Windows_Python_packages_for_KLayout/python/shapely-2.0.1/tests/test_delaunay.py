@@ -12,8 +12,9 @@ class DelaunayTriangulation(unittest.TestCase):
     This doesn't actually test the points in the resulting geometries.
 
     """
+
     def setUp(self):
-        self.p = Polygon([(0,0), (1,0), (1,1), (0,1)])
+        self.p = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
 
     def test_polys(self):
         polys = triangulate(self.p)
@@ -28,6 +29,6 @@ class DelaunayTriangulation(unittest.TestCase):
             assert isinstance(p, LineString)
 
     def test_point(self):
-        p = Point(1,1)
+        p = Point(1, 1)
         polys = triangulate(p)
         assert len(polys) == 0

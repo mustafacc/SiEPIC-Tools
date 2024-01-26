@@ -1,4 +1,3 @@
-
 """
     Implements a new custom Distutils command for handling library
     configuration.
@@ -24,9 +23,9 @@ import json
 
 
 def load_stashed_config():
-    """ Load settings dict from the pickle file """
+    """Load settings dict from the pickle file"""
     try:
-        with open('h5config.json', 'r') as f:
+        with open("h5config.json", "r") as f:
             cfg = json.load(f)
         if not isinstance(cfg, dict):
             raise TypeError
@@ -37,25 +36,33 @@ def load_stashed_config():
 
 def stash_config(dct):
     """Save settings dict to the pickle file."""
-    with open('h5config.json', 'w') as f:
+    with open("h5config.json", "w") as f:
         json.dump(dct, f)
 
 
 def validate_version(s):
     """Ensure that s contains an X.Y.Z format version string, or ValueError."""
-    m = re.match('(\d+)\.(\d+)\.(\d+)$', s)
+    m = re.match("(\d+)\.(\d+)\.(\d+)$", s)
     if m:
         return tuple(int(x) for x in m.groups())
     raise ValueError(f"HDF5 version string {s!r} not in X.Y.Z format")
 
 
 def mpi_enabled():
-    return os.environ.get('HDF5_MPI') == "ON"
+    return os.environ.get("HDF5_MPI") == "ON"
 
 
 class BuildConfig:
-    def __init__(self, hdf5_includedirs, hdf5_libdirs, hdf5_define_macros,
-                 hdf5_version, mpi, ros3, direct_vfd):
+    def __init__(
+        self,
+        hdf5_includedirs,
+        hdf5_libdirs,
+        hdf5_define_macros,
+        hdf5_version,
+        mpi,
+        ros3,
+        direct_vfd,
+    ):
         self.hdf5_includedirs = hdf5_includedirs
         self.hdf5_libdirs = hdf5_libdirs
         self.hdf5_define_macros = hdf5_define_macros
@@ -64,16 +71,17 @@ class BuildConfig:
         self.ros3 = ros3
         self.direct_vfd = direct_vfd
 
-        if self.mpi and os.environ.get('H5PY_MSMPI') == 'ON':
+        if self.mpi and os.environ.get("H5PY_MSMPI") == "ON":
             self.msmpi = True
-            self.msmpi_inc_dirs = os.environ.get('MSMPI_INC').split(';')
+            self.msmpi_inc_dirs = os.environ.get("MSMPI_INC").split(";")
             import platform
+
             bitness, _ = platform.architecture()
-            if bitness == '64bit':
-                mpi_lib_envvar = 'MSMPI_LIB64'
+            if bitness == "64bit":
+                mpi_lib_envvar = "MSMPI_LIB64"
             else:
-                mpi_lib_envvar = 'MSMPI_LIB32'
-            self.msmpi_lib_dirs = os.environ.get(mpi_lib_envvar).split(';')
+                mpi_lib_envvar = "MSMPI_LIB32"
+            self.msmpi_lib_dirs = os.environ.get(mpi_lib_envvar).split(";")
         else:
             self.msmpi = False
             self.msmpi_inc_dirs = []
@@ -84,15 +92,21 @@ class BuildConfig:
         mpi = mpi_enabled()
         h5_inc, h5_lib, h5_macros = cls._find_hdf5_compiler_settings(mpi)
 
-        h5_version_s = os.environ.get('HDF5_VERSION')
-        h5py_ros3 = os.environ.get('H5PY_ROS3')
-        h5py_direct_vfd = os.environ.get('H5PY_DIRECT_VFD')
+        h5_version_s = os.environ.get("HDF5_VERSION")
+        h5py_ros3 = os.environ.get("H5PY_ROS3")
+        h5py_direct_vfd = os.environ.get("H5PY_DIRECT_VFD")
 
         if h5_version_s and not mpi and h5py_ros3 and h5py_direct_vfd:
             # if we know config, don't use wrapper, it may not be supported
             return cls(
-                h5_inc, h5_lib, h5_macros, validate_version(h5_version_s), mpi,
-                h5py_ros3 == '1', h5py_direct_vfd == '1')
+                h5_inc,
+                h5_lib,
+                h5_macros,
+                validate_version(h5_version_s),
+                mpi,
+                h5py_ros3 == "1",
+                h5py_direct_vfd == "1",
+            )
 
         h5_wrapper = HDF5LibWrapper(h5_lib)
         if h5_version_s:
@@ -103,12 +117,12 @@ class BuildConfig:
                 raise RuntimeError("MPI support not detected")
 
         if h5py_ros3:
-            ros3 = h5py_ros3 == '1'
+            ros3 = h5py_ros3 == "1"
         else:
             ros3 = h5_wrapper.has_ros3_support()
 
         if h5py_direct_vfd:
-            direct_vfd = h5py_direct_vfd == '1'
+            direct_vfd = h5py_direct_vfd == "1"
         else:
             direct_vfd = h5_wrapper.has_direct_vfd_support()
 
@@ -120,16 +134,21 @@ class BuildConfig:
 
         Returns (include_dirs, lib_dirs, define_macros)
         """
-        hdf5 = os.environ.get('HDF5_DIR')
-        hdf5_includedir = os.environ.get('HDF5_INCLUDEDIR')
-        hdf5_libdir = os.environ.get('HDF5_LIBDIR')
-        hdf5_pkgconfig_name = os.environ.get('HDF5_PKGCONFIG_NAME')
+        hdf5 = os.environ.get("HDF5_DIR")
+        hdf5_includedir = os.environ.get("HDF5_INCLUDEDIR")
+        hdf5_libdir = os.environ.get("HDF5_LIBDIR")
+        hdf5_pkgconfig_name = os.environ.get("HDF5_PKGCONFIG_NAME")
 
-        if sum([
-            bool(hdf5_includedir or hdf5_libdir),
-            bool(hdf5),
-            bool(hdf5_pkgconfig_name)
-        ]) > 1:
+        if (
+            sum(
+                [
+                    bool(hdf5_includedir or hdf5_libdir),
+                    bool(hdf5),
+                    bool(hdf5_pkgconfig_name),
+                ]
+            )
+            > 1
+        ):
             raise ValueError(
                 "Specify only one of: HDF5 lib/include dirs, HDF5 prefix dir, "
                 "or HDF5 pkgconfig name"
@@ -142,57 +161,58 @@ class BuildConfig:
 
         # Specified a prefix dir (e.g. '/usr/local')
         if hdf5:
-            inc_dirs = [op.join(hdf5, 'include')]
-            lib_dirs = [op.join(hdf5, 'lib')]
-            if sys.platform.startswith('win'):
-                lib_dirs.append(op.join(hdf5, 'bin'))
+            inc_dirs = [op.join(hdf5, "include")]
+            lib_dirs = [op.join(hdf5, "lib")]
+            if sys.platform.startswith("win"):
+                lib_dirs.append(op.join(hdf5, "bin"))
             return (inc_dirs, lib_dirs, [])
 
         # Specified a name to be looked up in pkgconfig
         if hdf5_pkgconfig_name:
             import pkgconfig
+
             if not pkgconfig.exists(hdf5_pkgconfig_name):
-                raise ValueError(
-                    f"No pkgconfig information for {hdf5_pkgconfig_name}"
-                )
+                raise ValueError(f"No pkgconfig information for {hdf5_pkgconfig_name}")
             pc = pkgconfig.parse(hdf5_pkgconfig_name)
-            return (pc['include_dirs'], pc['library_dirs'], pc['define_macros'])
+            return (pc["include_dirs"], pc["library_dirs"], pc["define_macros"])
 
         # Fallback: query pkgconfig for default hdf5 names
         import pkgconfig
-        pc_name = 'hdf5-openmpi' if mpi else 'hdf5'
+
+        pc_name = "hdf5-openmpi" if mpi else "hdf5"
         pc = {}
         try:
             if pkgconfig.exists(pc_name):
                 pc = pkgconfig.parse(pc_name)
         except EnvironmentError:
-            if os.name != 'nt':
+            if os.name != "nt":
                 print(
                     "Building h5py requires pkg-config unless the HDF5 path "
                     "is explicitly specified using the environment variable HDF5_DIR. "
                     "For more information and details, "
-                    "see https://docs.h5py.org/en/stable/build.html#custom-installation", file=sys.stderr
+                    "see https://docs.h5py.org/en/stable/build.html#custom-installation",
+                    file=sys.stderr,
                 )
                 raise
 
         return (
-            pc.get('include_dirs', []),
-            pc.get('library_dirs', []),
-            pc.get('define_macros', []),
+            pc.get("include_dirs", []),
+            pc.get("library_dirs", []),
+            pc.get("define_macros", []),
         )
 
     def as_dict(self):
         return {
-            'hdf5_includedirs': self.hdf5_includedirs,
-            'hdf5_libdirs': self.hdf5_libdirs,
-            'hdf5_define_macros': self.hdf5_define_macros,
-            'hdf5_version': list(self.hdf5_version),  # list() to match the JSON
-            'mpi': self.mpi,
-            'ros3': self.ros3,
-            'direct_vfd': self.direct_vfd,
-            'msmpi': self.msmpi,
-            'msmpi_inc_dirs': self.msmpi_inc_dirs,
-            'msmpi_lib_dirs': self.msmpi_lib_dirs,
+            "hdf5_includedirs": self.hdf5_includedirs,
+            "hdf5_libdirs": self.hdf5_libdirs,
+            "hdf5_define_macros": self.hdf5_define_macros,
+            "hdf5_version": list(self.hdf5_version),  # list() to match the JSON
+            "mpi": self.mpi,
+            "ros3": self.ros3,
+            "direct_vfd": self.direct_vfd,
+            "msmpi": self.msmpi,
+            "msmpi_inc_dirs": self.msmpi_inc_dirs,
+            "msmpi_lib_dirs": self.msmpi_lib_dirs,
         }
 
     def changed(self):
@@ -205,11 +225,11 @@ class BuildConfig:
 
     def summarise(self):
         def fmt_dirs(l):
-            return '\n'.join((['['] + [f'  {d!r}' for d in l] + [']'])) if l else '[]'
+            return "\n".join((["["] + [f"  {d!r}" for d in l] + ["]"])) if l else "[]"
 
-        print('*' * 80)
-        print(' ' * 23 + "Summary of the h5py configuration")
-        print('')
+        print("*" * 80)
+        print(" " * 23 + "Summary of the h5py configuration")
+        print("")
         print("  HDF5 include dirs:", fmt_dirs(self.hdf5_includedirs))
         print("  HDF5 library dirs:", fmt_dirs(self.hdf5_libdirs))
         print("       HDF5 Version:", repr(self.hdf5_version))
@@ -220,12 +240,11 @@ class BuildConfig:
         print("     MS-MPI Enabled:", self.msmpi)
         print("MS-MPI include dirs:", self.msmpi_inc_dirs)
         print("MS-MPI library dirs:", self.msmpi_lib_dirs)
-        print('')
-        print('*' * 80)
+        print("")
+        print("*" * 80)
 
 
 class HDF5LibWrapper:
-
     def __init__(self, libdirs):
         self._load_hdf5_lib(libdirs)
 
@@ -241,36 +260,38 @@ class HDF5LibWrapper:
 
         # extra keyword args to pass to LoadLibrary
         load_kw = {}
-        if sys.platform.startswith('darwin'):
-            default_path = 'libhdf5.dylib'
-            regexp = re.compile(r'^libhdf5.dylib')
-        elif sys.platform.startswith('win'):
-            if 'MSC' in sys.version:
-                default_path = 'hdf5.dll'
-                regexp = re.compile(r'^hdf5.dll')
+        if sys.platform.startswith("darwin"):
+            default_path = "libhdf5.dylib"
+            regexp = re.compile(r"^libhdf5.dylib")
+        elif sys.platform.startswith("win"):
+            if "MSC" in sys.version:
+                default_path = "hdf5.dll"
+                regexp = re.compile(r"^hdf5.dll")
             else:
-                default_path = 'libhdf5-0.dll'
-                regexp = re.compile(r'^libhdf5-[0-9].dll')
+                default_path = "libhdf5-0.dll"
+                regexp = re.compile(r"^libhdf5-[0-9].dll")
             if sys.version_info >= (3, 8):
                 # To overcome "difficulty" loading the library on windows
                 # https://bugs.python.org/issue42114
-                load_kw['winmode'] = 0
-        elif sys.platform.startswith('cygwin'):
-            default_path = 'cyghdf5-200.dll'
-            regexp = re.compile(r'^cyghdf5-\d+.dll$')
+                load_kw["winmode"] = 0
+        elif sys.platform.startswith("cygwin"):
+            default_path = "cyghdf5-200.dll"
+            regexp = re.compile(r"^cyghdf5-\d+.dll$")
         else:
-            default_path = 'libhdf5.so'
-            regexp = re.compile(r'^libhdf5.so')
+            default_path = "libhdf5.so"
+            regexp = re.compile(r"^libhdf5.so")
 
         path = None
         for d in libdirs:
             try:
                 candidates = [x for x in os.listdir(d) if regexp.match(x)]
             except Exception:
-                continue   # Skip invalid entries
+                continue  # Skip invalid entries
 
             if len(candidates) != 0:
-                candidates.sort(key=lambda x: len(x))   # Prefer libfoo.so to libfoo.so.X.Y.Z
+                candidates.sort(
+                    key=lambda x: len(x)
+                )  # Prefer libfoo.so to libfoo.so.X.Y.Z
                 path = op.abspath(op.join(d, candidates[0]))
                 break
 
@@ -287,7 +308,9 @@ class HDF5LibWrapper:
         try:
             lib = ctypes.CDLL(path, **load_kw)
         except Exception:
-            print("error: Unable to load dependency HDF5, make sure HDF5 is installed properly")
+            print(
+                "error: Unable to load dependency HDF5, make sure HDF5 is installed properly"
+            )
             raise
 
         self._lib = lib

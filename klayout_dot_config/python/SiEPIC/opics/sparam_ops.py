@@ -167,7 +167,6 @@ def innerconnect_s(A: ndarray, port_idx_A: int, port_idx_B: int) -> ndarray:
 
 
 def v_broadcast_sim(A: np.ndarray, port_idx_A: int, port_idx_B: int) -> np.ndarray:
-
     if port_idx_A > A.shape[-1] - 1 or port_idx_B > A.shape[-1] - 1:
         raise (ValueError("port indices are out of range"))
 

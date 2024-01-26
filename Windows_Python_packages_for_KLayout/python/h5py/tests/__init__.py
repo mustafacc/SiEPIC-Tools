@@ -8,7 +8,7 @@
 #           and contributor agreement.
 
 
-def run_tests(args=''):
+def run_tests(args=""):
     try:
         from pytest import main
     except ImportError:
@@ -18,6 +18,7 @@ def run_tests(args=''):
         from shlex import split
         from subprocess import call
         from sys import executable
+
         cli = [executable, "-m", "pytest", "--pyargs", "h5py"]
         cli.extend(split(args))
         return call(cli)

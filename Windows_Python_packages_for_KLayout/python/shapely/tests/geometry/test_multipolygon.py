@@ -9,7 +9,6 @@ from .test_multi import MultiGeometryTestCase
 
 class TestMultiPolygon(MultiGeometryTestCase):
     def test_multipolygon(self):
-
         # From coordinate tuples
         coords = [
             (

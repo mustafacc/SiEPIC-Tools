@@ -3,7 +3,6 @@ from shapely import geometry
 
 
 class BoxTestCase(unittest.TestCase):
-
     def test_ccw(self):
         b = geometry.box(0, 0, 1, 1, ccw=True)
         assert b.exterior.coords[0] == (1.0, 0.0)

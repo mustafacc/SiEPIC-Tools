@@ -21,10 +21,10 @@ import numpy as np
 import os
 import tempfile
 
-class BaseTest(TestCase):
 
+class BaseTest(TestCase):
     def setUp(self):
-        self.f = File(self.mktemp(), 'w')
+        self.f = File(self.mktemp(), "w")
 
     def tearDown(self):
         if self.f:
@@ -34,18 +34,19 @@ class BaseTest(TestCase):
 class TestName(BaseTest):
 
     """
-        Feature: .name attribute returns the object name
+    Feature: .name attribute returns the object name
     """
 
     def test_anonymous(self):
-        """ Anonymous objects have name None """
+        """Anonymous objects have name None"""
         grp = self.f.create_group(None)
         self.assertIs(grp.name, None)
+
 
 class TestParent(BaseTest):
 
     """
-        test the parent group of the high-level interface objects
+    test the parent group of the high-level interface objects
     """
 
     def test_object_parent(self):
@@ -61,18 +62,19 @@ class TestParent(BaseTest):
         parent = sub_grp.parent.name
         self.assertEqual(parent, "/bar")
 
+
 class TestMapping(BaseTest):
 
     """
-        Test if the registration of Group as a
-        Mapping behaves as expected
+    Test if the registration of Group as a
+    Mapping behaves as expected
     """
 
     def setUp(self):
         super().setUp()
-        data = ('a', 'b')
-        self.grp = self.f.create_group('bar')
-        self.attr = self.f.attrs.create('x', data)
+        data = ("a", "b")
+        self.grp = self.f.create_group("bar")
+        self.attr = self.f.attrs.create("x", data)
 
     def test_keys(self):
         key_1 = self.f.keys()
@@ -96,47 +98,48 @@ class TestMapping(BaseTest):
 class TestRepr(BaseTest):
 
     """
-        repr() works correctly with Unicode names
+    repr() works correctly with Unicode names
     """
 
-    USTRING = chr(0xfc) + chr(0xdf)
+    USTRING = chr(0xFC) + chr(0xDF)
 
     def _check_type(self, obj):
         self.assertIsInstance(repr(obj), str)
 
     def test_group(self):
-        """ Group repr() with unicode """
+        """Group repr() with unicode"""
         grp = self.f.create_group(self.USTRING)
         self._check_type(grp)
 
     def test_dataset(self):
-        """ Dataset repr() with unicode """
+        """Dataset repr() with unicode"""
         dset = self.f.create_dataset(self.USTRING, (1,))
         self._check_type(dset)
 
     def test_namedtype(self):
-        """ Named type repr() with unicode """
-        self.f['type'] = np.dtype('f')
-        typ = self.f['type']
+        """Named type repr() with unicode"""
+        self.f["type"] = np.dtype("f")
+        typ = self.f["type"]
         self._check_type(typ)
 
     def test_empty(self):
-        data = Empty(dtype='f')
-        self.assertNotEqual(Empty(dtype='i'), data)
+        data = Empty(dtype="f")
+        self.assertNotEqual(Empty(dtype="i"), data)
         self._check_type(data)
 
     @ut.skipIf(not UNICODE_FILENAMES, "Filesystem unicode support required")
     def test_file(self):
-        """ File object repr() with unicode """
-        fname = tempfile.mktemp(self.USTRING+'.hdf5')
+        """File object repr() with unicode"""
+        fname = tempfile.mktemp(self.USTRING + ".hdf5")
         try:
-            with File(fname,'w') as f:
+            with File(fname, "w") as f:
                 self._check_type(f)
         finally:
             try:
                 os.unlink(fname)
             except Exception:
                 pass
+
 
 def test_is_hdf5():
     filename = File(tempfile.mktemp(), "w").filename

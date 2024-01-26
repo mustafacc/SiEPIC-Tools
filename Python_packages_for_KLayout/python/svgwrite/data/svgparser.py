@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding:utf-8
+# coding:utf-8
 # Author:  mozman --<mozman@gmx.at>
 # Purpose: svgparser using pyparser
 # Created: 16.10.2010
@@ -15,24 +15,49 @@ from pyparsing import *
 from functools import partial
 
 event_names = [
-    "focusin", "focusout", "activate", "click", "mousedown", "mouseup", "mouseover",
-    "mousemove", "mouseout", "DOMSubtreeModified", "DOMNodeInserted", "DOMNodeRemoved",
-    "DOMNodeRemovedFromDocument", "DOMNodeInsertedtoDocument", "DOMAttrModified",
-    "DOMCharacterDataModified", "SVGLoad", "SVGUnload", "SVGAbort", "SVGError",
-    "SVGResize", "SVGScroll", "SVGZoom", "beginEvent", "endEvent", "repeatEvent",
-    ]
+    "focusin",
+    "focusout",
+    "activate",
+    "click",
+    "mousedown",
+    "mouseup",
+    "mouseover",
+    "mousemove",
+    "mouseout",
+    "DOMSubtreeModified",
+    "DOMNodeInserted",
+    "DOMNodeRemoved",
+    "DOMNodeRemovedFromDocument",
+    "DOMNodeInsertedtoDocument",
+    "DOMAttrModified",
+    "DOMCharacterDataModified",
+    "SVGLoad",
+    "SVGUnload",
+    "SVGAbort",
+    "SVGError",
+    "SVGResize",
+    "SVGScroll",
+    "SVGZoom",
+    "beginEvent",
+    "endEvent",
+    "repeatEvent",
+]
 
-sign = oneOf('+ -')
-comma = Literal(',') * (0, 1)  # zero or one ','
-semicolon = Literal(';') * (0, 1)  # zero or one ';'
+sign = oneOf("+ -")
+comma = Literal(",") * (0, 1)  # zero or one ','
+semicolon = Literal(";") * (0, 1)  # zero or one ';'
 integer_constant = Word(nums)
-exponent = CaselessLiteral('E') + Optional(sign) + integer_constant
-fractional_constant = Combine(Optional(integer_constant) + '.' + integer_constant) \
-    ^ Combine(integer_constant + '.')
-scientific_constant = Combine(fractional_constant + Optional(exponent)) \
-    ^ Combine(integer_constant + exponent)
-number = Combine(Optional(sign) + integer_constant) \
-    ^ Combine(Optional(sign) + scientific_constant)
+exponent = CaselessLiteral("E") + Optional(sign) + integer_constant
+fractional_constant = Combine(
+    Optional(integer_constant) + "." + integer_constant
+) ^ Combine(integer_constant + ".")
+scientific_constant = Combine(fractional_constant + Optional(exponent)) ^ Combine(
+    integer_constant + exponent
+)
+number = Combine(Optional(sign) + integer_constant) ^ Combine(
+    Optional(sign) + scientific_constant
+)
+
 
 def has_valid_syntax(term, parser):
     try:
@@ -43,12 +68,18 @@ def has_valid_syntax(term, parser):
 
 
 def build_transferlist_parser():
-    matrix = Literal("matrix") + '(' + number + (Suppress(comma) + number) * 5 + ')'
-    translate = Literal("translate") + '(' + number + Optional(comma + number) + ')'
-    scale = Literal("scale") + '(' + number + Optional(comma + number) + ')'
-    rotate = Literal("rotate") + '(' + number + Optional(comma + number + comma + number) + ')'
-    skewX = Literal("skewX") + '(' + number + ')'
-    skewY = Literal("skewY") + '(' + number + ')'
+    matrix = Literal("matrix") + "(" + number + (Suppress(comma) + number) * 5 + ")"
+    translate = Literal("translate") + "(" + number + Optional(comma + number) + ")"
+    scale = Literal("scale") + "(" + number + Optional(comma + number) + ")"
+    rotate = (
+        Literal("rotate")
+        + "("
+        + number
+        + Optional(comma + number + comma + number)
+        + ")"
+    )
+    skewX = Literal("skewX") + "(" + number + ")"
+    skewY = Literal("skewY") + "(" + number + ")"
     transform = matrix | translate | scale | rotate | skewX | skewY
     return transform + ZeroOrMore(comma + transform)
 
@@ -61,47 +92,81 @@ def build_pathdata_parser():
     coordinate = number
     coordinate_pair = coordinate + comma + coordinate
     nonnegative_number = integer_constant ^ scientific_constant
-    flag = oneOf('0 1')
+    flag = oneOf("0 1")
     comma_delimited_coordinates = coordinate + ZeroOrMore(comma + coordinate)
-    comma_delimited_coordinate_pairs = coordinate_pair + ZeroOrMore(comma + coordinate_pair)
+    comma_delimited_coordinate_pairs = coordinate_pair + ZeroOrMore(
+        comma + coordinate_pair
+    )
 
-    closepath = oneOf('Z z')
-    moveto = oneOf('M m') + comma_delimited_coordinate_pairs
-    lineto = oneOf('L l') + comma_delimited_coordinate_pairs
-    horizontal_lineto = oneOf('H h') + comma_delimited_coordinates
-    vertical_lineto = oneOf('V v') + comma_delimited_coordinates
+    closepath = oneOf("Z z")
+    moveto = oneOf("M m") + comma_delimited_coordinate_pairs
+    lineto = oneOf("L l") + comma_delimited_coordinate_pairs
+    horizontal_lineto = oneOf("H h") + comma_delimited_coordinates
+    vertical_lineto = oneOf("V v") + comma_delimited_coordinates
 
-    curveto_argument_sequence = coordinate_pair + comma + coordinate_pair + comma + coordinate_pair
-    curveto = oneOf('C c') + curveto_argument_sequence + ZeroOrMore(comma + curveto_argument_sequence)
+    curveto_argument_sequence = (
+        coordinate_pair + comma + coordinate_pair + comma + coordinate_pair
+    )
+    curveto = (
+        oneOf("C c")
+        + curveto_argument_sequence
+        + ZeroOrMore(comma + curveto_argument_sequence)
+    )
 
     smooth_curveto_argument_sequence = coordinate_pair + comma + coordinate_pair
-    smooth_curveto = oneOf('S s') + smooth_curveto_argument_sequence \
+    smooth_curveto = (
+        oneOf("S s")
+        + smooth_curveto_argument_sequence
         + ZeroOrMore(comma + smooth_curveto_argument_sequence)
+    )
 
-    quadratic_bezier_curveto_argument_sequence = coordinate_pair + comma + coordinate_pair
-    quadratic_bezier_curveto = oneOf('Q q') + quadratic_bezier_curveto_argument_sequence \
+    quadratic_bezier_curveto_argument_sequence = (
+        coordinate_pair + comma + coordinate_pair
+    )
+    quadratic_bezier_curveto = (
+        oneOf("Q q")
+        + quadratic_bezier_curveto_argument_sequence
         + ZeroOrMore(comma + quadratic_bezier_curveto_argument_sequence)
+    )
 
-    smooth_quadratic_bezier_curveto = oneOf('T t') + coordinate_pair \
-        + ZeroOrMore(comma + coordinate_pair)
+    smooth_quadratic_bezier_curveto = (
+        oneOf("T t") + coordinate_pair + ZeroOrMore(comma + coordinate_pair)
+    )
 
-    elliptical_arc_argument = nonnegative_number + comma + nonnegative_number \
-        + comma + number + comma + flag + comma + flag + comma + coordinate_pair
+    elliptical_arc_argument = (
+        nonnegative_number
+        + comma
+        + nonnegative_number
+        + comma
+        + number
+        + comma
+        + flag
+        + comma
+        + flag
+        + comma
+        + coordinate_pair
+    )
 
-    elliptical_arc = oneOf('A a') + elliptical_arc_argument \
+    elliptical_arc = (
+        oneOf("A a")
+        + elliptical_arc_argument
         + ZeroOrMore(comma + elliptical_arc_argument)
+    )
 
-    drawto_command = closepath \
-        | lineto \
-        | horizontal_lineto \
-        | vertical_lineto \
-        | curveto \
-        | smooth_curveto \
-        | quadratic_bezier_curveto \
-        | smooth_quadratic_bezier_curveto \
+    drawto_command = (
+        closepath
+        | lineto
+        | horizontal_lineto
+        | vertical_lineto
+        | curveto
+        | smooth_curveto
+        | quadratic_bezier_curveto
+        | smooth_quadratic_bezier_curveto
         | elliptical_arc
+    )
 
     return OneOrMore(moveto + ZeroOrMore(drawto_command))
+
 
 pathdata_parser = build_pathdata_parser()
 is_valid_pathdata = partial(has_valid_syntax, parser=pathdata_parser)
@@ -132,7 +197,9 @@ def build_wall_clock_val_parser():
     month = digit2
     year = Word(nums, exact=4)
     tzd = Literal("Z") | (sign + hours24 + ":" + minutes)
-    hhmmss = hours24 + ":" + minutes + Optional(":" + seconds + Optional("." + fraction))
+    hhmmss = (
+        hours24 + ":" + minutes + Optional(":" + seconds + Optional("." + fraction))
+    )
     walltime = hhmmss + Optional(tzd)
     date = year + "-" + month + "-" + day
     datetime = date + "T" + walltime
@@ -148,14 +215,30 @@ def build_animation_timing_parser():
     opt_clock_val = Optional(sign + clock_val)
 
     wallclock_sync_value = Literal("wallclock(") + wallclock_value + ")"
-    accesskey_value = Literal("accessKey(") + Word(alphas, exact=1) + ")" + opt_clock_val
-    repeat_value = Optional(id_value + ".") + Literal("repeat(") + integer_constant + ")" + opt_clock_val
+    accesskey_value = (
+        Literal("accessKey(") + Word(alphas, exact=1) + ")" + opt_clock_val
+    )
+    repeat_value = (
+        Optional(id_value + ".")
+        + Literal("repeat(")
+        + integer_constant
+        + ")"
+        + opt_clock_val
+    )
     event_value = Optional(id_value + ".") + event_ref + opt_clock_val
     syncbase_value = id_value + "." + oneOf("begin end") + opt_clock_val
     offset_value = Optional(sign) + clock_val
-    begin_value = offset_value | syncbase_value | event_value | repeat_value \
-                | accesskey_value | wallclock_sync_value | Literal("indefinite")
+    begin_value = (
+        offset_value
+        | syncbase_value
+        | event_value
+        | repeat_value
+        | accesskey_value
+        | wallclock_sync_value
+        | Literal("indefinite")
+    )
     return begin_value + ZeroOrMore(semicolon + begin_value)
+
 
 animation_timing_parser = build_animation_timing_parser()
 is_valid_animation_timing = partial(has_valid_syntax, parser=animation_timing_parser)

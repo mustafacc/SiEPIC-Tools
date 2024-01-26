@@ -11,8 +11,8 @@ from h5py import _objects as o
 
 from .common import TestCase
 
-class TestObjects(TestCase):
 
+class TestObjects(TestCase):
     def test_invalid(self):
         # Check for segfault on close
         oid = o.ObjectID(0)

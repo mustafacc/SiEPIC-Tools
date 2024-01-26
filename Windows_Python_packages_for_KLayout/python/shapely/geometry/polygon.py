@@ -131,7 +131,6 @@ shapely.lib.registry[2] = LinearRing
 
 
 class InteriorRingSequence:
-
     _parent = None
     _ndim = None
     _index = 0

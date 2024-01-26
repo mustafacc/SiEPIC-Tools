@@ -21,17 +21,17 @@ class DeprecatedBundleWarning(DeprecationWarning):
 def where():
     f = os.path.dirname(__file__)
 
-    return os.path.join(f, 'cacert.pem')
+    return os.path.join(f, "cacert.pem")
 
 
 def old_where():
     warnings.warn(
-        "The weak security bundle is being deprecated. It will be removed in "
-        "2018.",
-        DeprecatedBundleWarning
+        "The weak security bundle is being deprecated. It will be removed in " "2018.",
+        DeprecatedBundleWarning,
     )
     f = os.path.dirname(__file__)
-    return os.path.join(f, 'weak.pem')
+    return os.path.join(f, "weak.pem")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print(where())
